@@ -1,0 +1,3250 @@
+{
+  "version": 1,
+  "chapters": [
+    {
+      "index": 1,
+      "title": "First Rain",
+      "subtitle": "Warm air, cold air, and what falls between them"
+    },
+    {
+      "index": 2,
+      "title": "Follow the Wind",
+      "subtitle": "Push the sky where you need it"
+    },
+    {
+      "index": 3,
+      "title": "High Country",
+      "subtitle": "Mountains squeeze the clouds dry"
+    },
+    {
+      "index": 4,
+      "title": "Delicate Harvest",
+      "subtitle": "Some things must not be touched by frost"
+    },
+    {
+      "index": 5,
+      "title": "Wetlands",
+      "subtitle": "Where the water goes after it lands"
+    },
+    {
+      "index": 6,
+      "title": "Woven Skies",
+      "subtitle": "Everything you have learned, at once"
+    },
+    {
+      "index": 7,
+      "title": "Thawing Season",
+      "subtitle": "Snow is only water that has not arrived yet"
+    },
+    {
+      "index": 8,
+      "title": "Storm Braid",
+      "subtitle": "Wind decides where the weather goes"
+    },
+    {
+      "index": 9,
+      "title": "The Weaver's Trial",
+      "subtitle": "Every thread you know, on one loom"
+    }
+  ],
+  "levels": [
+    {
+      "id": "c1-1",
+      "chapter": 1,
+      "name": "Bellhollow Meadow",
+      "brief": "Four bellflowers are waiting for a drink.",
+      "hint": "Warm moist air meeting cold air makes rain. Draw the two fronts a little apart and the rain falls in the band between them.",
+      "map": [
+        "TTmmmmTT",
+        "TmmmmmmT",
+        "mmm--mmm",
+        "mmh-hmmm",
+        "mmmmmmmm",
+        "mfmffmfm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "TmmmmmmT",
+        "mmmmmmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 44,
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1
+      },
+      "maxThreadCells": 16,
+      "objectives": [
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Flowers"
+        }
+      ],
+      "bloomStrokes": 2,
+      "flourishStrokes": 2,
+      "flourishCells": 16,
+      "reward": "sunlace",
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            4
+          ],
+          "to": [
+            7,
+            4
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            7
+          ],
+          "to": [
+            7,
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c1-2",
+      "chapter": 1,
+      "name": "Stonebrook Basin",
+      "brief": "The cistern below the ridge has been dry all season.",
+      "hint": "Rainwater runs downhill and a stream will carry it the rest of the way. Rain high on the slope, not over the basin.",
+      "map": [
+        "^^^^^^^^",
+        "^^^ss^^^",
+        "sssmmsss",
+        "mmmmmmmm",
+        "mTmmmmTm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mm~~~~mm",
+        "mmRRRRmm",
+        "mmRRRRmm",
+        "mmmhmmmm",
+        "TTmmmmTT"
+      ],
+      "elevation": [
+        "33333333",
+        "33333333",
+        "22222222",
+        "22222222",
+        "22222222",
+        "11111111",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1
+      },
+      "maxThreadCells": 16,
+      "objectives": [
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 7,
+          "label": "Reservoir"
+        }
+      ],
+      "bloomStrokes": 2,
+      "flourishStrokes": 2,
+      "flourishCells": 16,
+      "reward": "cloudmoss",
+      "solution": [
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c1-3",
+      "chapter": 1,
+      "name": "Larkspur Field",
+      "brief": "Two rows of larkspur, one cold front to share between them.",
+      "hint": "A cold front makes rain on both of its sides. Put a warm front above and below it.",
+      "map": [
+        "TTmmmmTT",
+        "mmmmmmmm",
+        "mmm--mmm",
+        "mfmfmmfm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmfmmfmm",
+        "TmmmmmmT",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 1,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 52,
+      "threads": {
+        "WarmFront": 2,
+        "ColdFront": 1
+      },
+      "maxThreadCells": 16,
+      "objectives": [
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 5,
+          "label": "Flowers"
+        }
+      ],
+      "bloomStrokes": 3,
+      "flourishStrokes": 3,
+      "flourishCells": 24,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            6
+          ],
+          "to": [
+            7,
+            6
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c2-1",
+      "chapter": 2,
+      "name": "Windmere Downs",
+      "brief": "Two mills, both stopped, both waiting for a breeze.",
+      "hint": "A wind band turns every mill it crosses. Draw it straight through both.",
+      "map": [
+        "TTmmmmTT",
+        "mmmmmmmm",
+        "mWmmmmWm",
+        "mmmmmmmm",
+        "mmm--mmm",
+        "mmh-hmmm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "TmmmmmmT",
+        "mmmmmmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 1,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 40,
+      "threads": {
+        "WindBand": 1
+      },
+      "maxThreadCells": 16,
+      "objectives": [
+        {
+          "metric": "WindmillTicks",
+          "cmp": "Gte",
+          "target": 20,
+          "label": "Mills",
+          "everyWindmill": true
+        }
+      ],
+      "bloomStrokes": 1,
+      "flourishStrokes": 1,
+      "flourishCells": 10,
+      "reward": "windreed",
+      "solution": [
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            2
+          ],
+          "to": [
+            7,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c2-2",
+      "chapter": 2,
+      "name": "Hush Village",
+      "brief": "Nobody has seen the rooftops in three days.",
+      "hint": "Strong wind clears fog, and it pushes the fog it does not clear somewhere else.",
+      "map": [
+        "TTmmmmTT",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mm----mm",
+        "mhvvvhmm",
+        "mmvhvmmm",
+        "mm----mm",
+        "mmmmmmmm",
+        "TmmmmmmT",
+        "mWmmmmWm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "fog": [
+        "00000000",
+        "00000000",
+        "01111100",
+        "01111100",
+        "02222200",
+        "02222200",
+        "01111100",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "baseTemp": 0,
+      "startMoisture": 1,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 44,
+      "threads": {
+        "WindBand": 2
+      },
+      "maxThreadCells": 16,
+      "objectives": [
+        {
+          "metric": "VillageFog",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Village fog"
+        },
+        {
+          "metric": "WindmillTicks",
+          "cmp": "Gte",
+          "target": 15,
+          "label": "Mills",
+          "everyWindmill": true
+        }
+      ],
+      "bloomStrokes": 2,
+      "flourishStrokes": 2,
+      "flourishCells": 20,
+      "reward": "mistcap",
+      "solution": [
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            4
+          ],
+          "to": [
+            7,
+            4
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            9
+          ],
+          "to": [
+            7,
+            9
+          ]
+        }
+      ]
+    },
+    {
+      "baseTemp": 0,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 48,
+      "maxThreadCells": 18,
+      "bloomStrokes": 2,
+      "flourishStrokes": 2,
+      "flourishCells": 22,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            2
+          ],
+          "to": [
+            7,
+            2
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            5
+          ],
+          "to": [
+            7,
+            5
+          ]
+        }
+      ],
+      "id": "c2-3",
+      "chapter": 2,
+      "name": "Kestrel Ridge",
+      "brief": "Three mills along the ridge, and a fog bank sitting on the low road.",
+      "hint": "One band can serve a whole line of mills if you draw it along them, not across them.",
+      "map": [
+        "TTmmmmTT",
+        "mWmmmmWm",
+        "mmmmmmmm",
+        "mmmWmmmm",
+        "mmmmmmmm",
+        "mm----mm",
+        "mhvvvhmm",
+        "mm----mm",
+        "mmmmmmmm",
+        "TmmmmmmT",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "22222222",
+        "22222222",
+        "11111111",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111"
+      ],
+      "fog": [
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "01111100",
+        "02222200",
+        "02222200",
+        "01111100",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "threads": {
+        "WindBand": 2
+      },
+      "objectives": [
+        {
+          "metric": "WindmillTicks",
+          "cmp": "Gte",
+          "target": 18,
+          "label": "Mills",
+          "everyWindmill": true
+        },
+        {
+          "metric": "VillageFog",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Low road"
+        }
+      ]
+    },
+    {
+      "id": "c3-1",
+      "chapter": 3,
+      "name": "Coldpike Summit",
+      "brief": "The pike has not worn a white cap in living memory.",
+      "hint": "If it is freezing where the precipitation falls, rain becomes snow. Cold air alone is not enough — it needs moisture.",
+      "map": [
+        "^^^^^^^^",
+        "^^^^^^^^",
+        "s^^^^^^s",
+        "ssssssss",
+        "mmmmmmmm",
+        "mmTTmmmm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmm--mmm",
+        "mmh-hmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "33333333",
+        "33333333",
+        "33333333",
+        "22222222",
+        "22222222",
+        "11111111",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 1,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 56,
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1,
+        "MoistureRibbon": 1
+      },
+      "maxThreadCells": 16,
+      "objectives": [
+        {
+          "metric": "SnowTiles",
+          "cmp": "Gte",
+          "target": 8,
+          "label": "Summit snow"
+        }
+      ],
+      "bloomStrokes": 3,
+      "flourishStrokes": 3,
+      "flourishCells": 24,
+      "reward": "frostfern",
+      "solution": [
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c3-2",
+      "chapter": 3,
+      "name": "Rainshadow Pass",
+      "brief": "The cistern sits on the wrong side of the ridge.",
+      "hint": "Mountains squeeze rain from moist clouds on the side the wind arrives from. Rain must fall on the cistern's side of the pass.",
+      "map": [
+        "mmmmmmmm",
+        "mmRRmmmm",
+        "mmmmmmmm",
+        "ssmmmmss",
+        "^^^^^^^^",
+        "^^^^^^^^",
+        "^^^^^^^^",
+        "ssmmmmss",
+        "mmmmmmmm",
+        "mmccccmm",
+        "TmmmmmmT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "22222222",
+        "33333333",
+        "22222222",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 1,
+      "startReservoir": 0,
+      "reservoirCapacity": 4,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1,
+        "WindBand": 1,
+        "MoistureRibbon": 1
+      },
+      "maxThreadCells": 18,
+      "objectives": [
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Cistern"
+        },
+        {
+          "metric": "FrozenCrops",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Crops"
+        }
+      ],
+      "bloomStrokes": 4,
+      "flourishStrokes": 3,
+      "flourishCells": 30,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            2
+          ],
+          "to": [
+            7,
+            2
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            3,
+            1
+          ],
+          "to": [
+            3,
+            5
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c4-1",
+      "chapter": 4,
+      "name": "Emberfield Farm",
+      "brief": "Bloom the border flowers. Do not touch the barley.",
+      "hint": "A front chills the tiles beside it too. Crops freeze if they stay cold for four beats.",
+      "map": [
+        "TTmmmmTT",
+        "mmmmmmmm",
+        "mmccccmm",
+        "mmccccmm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mfmffmfm",
+        "mmmmmmmm",
+        "mmm--mmm",
+        "mmh-hmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 52,
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1
+      },
+      "maxThreadCells": 16,
+      "objectives": [
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Flowers"
+        },
+        {
+          "metric": "FrozenCrops",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Barley"
+        }
+      ],
+      "bloomStrokes": 2,
+      "flourishStrokes": 2,
+      "flourishCells": 16,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            5
+          ],
+          "to": [
+            7,
+            5
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            8
+          ],
+          "to": [
+            7,
+            8
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c4-2",
+      "chapter": 4,
+      "name": "Frostgate Orchard",
+      "brief": "Snow on the gate ridge. Frost nowhere near the orchard.",
+      "hint": "Keep the cold high and far. Moisture can travel where a front should not.",
+      "map": [
+        "^^^^^^^^",
+        "^^^^^^^^",
+        "ssssssss",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmccccmm",
+        "mmccccmm",
+        "mmmmmmmm",
+        "mmh-hmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "33333333",
+        "33333333",
+        "22222222",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 56,
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1,
+        "MoistureRibbon": 1
+      },
+      "maxThreadCells": 16,
+      "objectives": [
+        {
+          "metric": "SnowTiles",
+          "cmp": "Gte",
+          "target": 8,
+          "label": "Ridge snow"
+        },
+        {
+          "metric": "FrozenCrops",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Orchard"
+        }
+      ],
+      "bloomStrokes": 3,
+      "flourishStrokes": 3,
+      "flourishCells": 24,
+      "reward": null,
+      "solution": [
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 56,
+      "maxThreadCells": 18,
+      "bloomStrokes": 3,
+      "flourishStrokes": 2,
+      "flourishCells": 24,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            4
+          ],
+          "to": [
+            7,
+            4
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        }
+      ],
+      "id": "c4-3",
+      "chapter": 4,
+      "name": "Candlewick Rows",
+      "brief": "Bloom the candlewick. The seed barley either side must stay warm.",
+      "hint": "Cold air spills one tile past the thread you draw. Leave the barley a margin.",
+      "map": [
+        "TTmmmmTT",
+        "mmccccmm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mfmffmfm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmccccmm",
+        "mmmmmmmm",
+        "mmh-hmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "threads": {
+        "WarmFront": 2,
+        "ColdFront": 1
+      },
+      "objectives": [
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Candlewick"
+        },
+        {
+          "metric": "FrozenCrops",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Barley"
+        }
+      ]
+    },
+    {
+      "id": "c5-1",
+      "chapter": 5,
+      "name": "Marrowmere",
+      "brief": "The mere has drawn back from its banks. The village must stay dry.",
+      "hint": "Water spreads once it is deep, and it always looks for the lowest ground.",
+      "map": [
+        "TTmmmmTT",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mm~~mmmm",
+        "mmwwwwmm",
+        "mwwwwwwm",
+        "mmwwwwmm",
+        "mmmmmmmm",
+        "mmhvhmmm",
+        "mmmmmmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1,
+        "MoistureRibbon": 1
+      },
+      "maxThreadCells": 16,
+      "objectives": [
+        {
+          "metric": "WetlandWater",
+          "cmp": "Gte",
+          "target": 12,
+          "label": "Mere"
+        },
+        {
+          "metric": "FloodedTiles",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Village"
+        }
+      ],
+      "bloomStrokes": 3,
+      "flourishStrokes": 2,
+      "flourishCells": 20,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            2
+          ],
+          "to": [
+            7,
+            2
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        }
+      ]
+    },
+    {
+      "id": "c5-2",
+      "chapter": 5,
+      "name": "Twin Cisterns",
+      "brief": "Two cisterns, one sky. Between them, eight units of water.",
+      "hint": "Rain that lands in the middle will find both basins if it gets deep enough.",
+      "map": [
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "ssmmmmss",
+        "mmmmmmmm",
+        "RRmmmmRR",
+        "RRmmmmRR",
+        "mmmmmmmm",
+        "mmm--mmm",
+        "mmh-hmmm",
+        "mmmmmmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "22222222",
+        "22222222",
+        "22222222",
+        "11111111",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1,
+        "MoistureRibbon": 1
+      },
+      "maxThreadCells": 18,
+      "objectives": [
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 8,
+          "label": "Cisterns"
+        }
+      ],
+      "bloomStrokes": 3,
+      "flourishStrokes": 2,
+      "flourishCells": 20,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            2
+          ],
+          "to": [
+            7,
+            2
+          ]
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 6,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 3,
+      "flourishStrokes": 3,
+      "flourishCells": 30,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            5
+          ],
+          "to": [
+            7,
+            5
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            2
+          ],
+          "to": [
+            7,
+            2
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            4,
+            6
+          ],
+          "to": [
+            7,
+            6
+          ]
+        }
+      ],
+      "id": "c5-3",
+      "chapter": 5,
+      "name": "Sluicegate Fen",
+      "brief": "Fill the fen and top the cistern below it without drowning the lane.",
+      "hint": "A brook takes water past the tiles it runs through. Follow where it points.",
+      "map": [
+        "TTmmmmTT",
+        "mmmmmmmm",
+        "mmwwwwmm",
+        "mmwwwwmm",
+        "mmm~~mmm",
+        "mmm~~mmm",
+        "mmRRRRmm",
+        "mmRRRRmm",
+        "mmmmmmmm",
+        "mm-hh-mm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "22222222",
+        "22222222",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111"
+      ],
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1,
+        "MoistureRibbon": 1
+      },
+      "objectives": [
+        {
+          "metric": "WetlandWater",
+          "cmp": "Gte",
+          "target": 8,
+          "label": "Fen"
+        },
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 5,
+          "label": "Cistern"
+        },
+        {
+          "metric": "FloodedTiles",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Lane"
+        }
+      ]
+    },
+    {
+      "id": "c6-1",
+      "chapter": 6,
+      "name": "Millbrook Hollow",
+      "brief": "The whole hollow at once: mills turning, flowers open, the brook pool full.",
+      "hint": "One cold front can serve two rain bands. Rain that lands beside a brook is rain the flowers will not get.",
+      "map": [
+        "TTmmmmTT",
+        "mWmmmmWm",
+        "mmmmmmmm",
+        "mfmfmmfm",
+        "mmmmmmmm",
+        "mfmffmfm",
+        "mm~mm~mm",
+        "mmRRRRmm",
+        "mmRRRRmm",
+        "mmmmmmmm",
+        "TTh--hTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "11111111"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 1,
+      "startReservoir": 0,
+      "reservoirCapacity": 4,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "threads": {
+        "WarmFront": 2,
+        "ColdFront": 1,
+        "WindBand": 1,
+        "MoistureRibbon": 1
+      },
+      "maxThreadCells": 18,
+      "objectives": [
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Reservoir"
+        },
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 6,
+          "label": "Flowers"
+        },
+        {
+          "metric": "WindmillTicks",
+          "cmp": "Gte",
+          "target": 15,
+          "label": "Mills",
+          "everyWindmill": true
+        }
+      ],
+      "bloomStrokes": 4,
+      "flourishStrokes": 4,
+      "flourishCells": 40,
+      "reward": "rainbell",
+      "solution": [
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            2
+          ],
+          "to": [
+            7,
+            2
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            4
+          ],
+          "to": [
+            7,
+            4
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            6
+          ],
+          "to": [
+            7,
+            6
+          ]
+        }
+      ],
+      "_note": "two cancel bands at rows 3 and 5 rain onto both flower rows; row 5 runoff drains into the pool at rows 7-8"
+    },
+    {
+      "id": "c6-2",
+      "chapter": 6,
+      "name": "The Long Loom",
+      "brief": "Snow on the pike, water in the pool, flowers on the terrace, frost nowhere near the barley.",
+      "hint": "Work from the top of the map down. Everything you make runs downhill into the next problem.",
+      "map": [
+        "^^^^^^^^",
+        "^^^^^^^^",
+        "sssmmsss",
+        "mmmmmmmm",
+        "mWmm~mWm",
+        "mmmm~mmm",
+        "mfmm~mfm",
+        "mmmm~mmm",
+        "mmRRRRmm",
+        "mmRRRRmm",
+        "TTccccTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "55555555",
+        "55555555",
+        "44444444",
+        "33333333",
+        "33333333",
+        "22222222",
+        "22222222",
+        "22222222",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111"
+      ],
+      "baseTemp": 1,
+      "startMoisture": 1,
+      "startReservoir": 0,
+      "reservoirCapacity": 5,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "threads": {
+        "WarmFront": 2,
+        "ColdFront": 1,
+        "WindBand": 1,
+        "MoistureRibbon": 1
+      },
+      "maxThreadCells": 18,
+      "objectives": [
+        {
+          "metric": "SnowTiles",
+          "cmp": "Gte",
+          "target": 6,
+          "label": "Pike snow"
+        },
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 5,
+          "label": "Pool"
+        },
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 2,
+          "label": "Terrace"
+        },
+        {
+          "metric": "FrozenCrops",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Barley"
+        }
+      ],
+      "bloomStrokes": 5,
+      "flourishStrokes": 4,
+      "flourishCells": 44,
+      "reward": null,
+      "solution": [
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            4
+          ],
+          "to": [
+            7,
+            4
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            5
+          ],
+          "to": [
+            7,
+            5
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            7
+          ],
+          "to": [
+            7,
+            7
+          ]
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 6,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 4,
+      "flourishStrokes": 3,
+      "flourishCells": 34,
+      "reward": "thawlily",
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            5
+          ],
+          "to": [
+            7,
+            5
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            2
+          ],
+          "to": [
+            7,
+            2
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            6
+          ],
+          "to": [
+            7,
+            6
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        }
+      ],
+      "id": "c7-1",
+      "chapter": 7,
+      "name": "Snowmelt Steps",
+      "brief": "Cap the steps in snow, then let the sun send it down to the cistern.",
+      "hint": "Snow melts wherever the air is above freezing. Make it high and cold, then warm the slope below.",
+      "map": [
+        "^^^^^^^^",
+        "^^^^^^^^",
+        "ssssssss",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mm~~~~mm",
+        "mmmmmmmm",
+        "mmRRRRmm",
+        "mmRRRRmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "44444444",
+        "44444444",
+        "33333333",
+        "33333333",
+        "22222222",
+        "22222222",
+        "22222222",
+        "11111111",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111"
+      ],
+      "threads": {
+        "WarmFront": 2,
+        "ColdFront": 1,
+        "MoistureRibbon": 1
+      },
+      "objectives": [
+        {
+          "metric": "SnowTiles",
+          "cmp": "Gte",
+          "target": 6,
+          "label": "Step snow"
+        },
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 5,
+          "label": "Cistern"
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 5,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 4,
+      "flourishStrokes": 3,
+      "flourishCells": 34,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            5
+          ],
+          "to": [
+            7,
+            5
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            8
+          ],
+          "to": [
+            7,
+            8
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            4,
+            5
+          ],
+          "to": [
+            7,
+            5
+          ]
+        }
+      ],
+      "id": "c7-2",
+      "chapter": 7,
+      "name": "Whitecap Tarn",
+      "brief": "A white cap on the horns and a full tarn beneath them.",
+      "hint": "Moisture can be carried to cold air instead of dragging the cold air down to it.",
+      "map": [
+        "^^^^^^^^",
+        "^^ss^^^^",
+        "^^^^^^^^",
+        "ssssssss",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmRRRRmm",
+        "mmRRRRmm",
+        "mmmmmmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "44444444",
+        "44444444",
+        "44444444",
+        "33333333",
+        "22222222",
+        "22222222",
+        "22222222",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "11111111"
+      ],
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1,
+        "MoistureRibbon": 2
+      },
+      "objectives": [
+        {
+          "metric": "SnowTiles",
+          "cmp": "Gte",
+          "target": 10,
+          "label": "Horn snow"
+        },
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Tarn"
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 4,
+      "flourishStrokes": 3,
+      "flourishCells": 34,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            6
+          ],
+          "to": [
+            7,
+            6
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            2
+          ],
+          "to": [
+            7,
+            2
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            4,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        }
+      ],
+      "id": "c7-3",
+      "chapter": 7,
+      "name": "Meltwater Meadow",
+      "brief": "The snowfield above feeds the meadow. Nothing else will.",
+      "hint": "Water that arrives as meltwater still counts as a drink. The flowers only need the air to stay mild.",
+      "map": [
+        "^^^^^^^^",
+        "ssssssss",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mfmffmfm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmccccmm",
+        "mmmmmmmm",
+        "mmh-hmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "44444444",
+        "33333333",
+        "22222222",
+        "22222222",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "threads": {
+        "WarmFront": 2,
+        "ColdFront": 1,
+        "MoistureRibbon": 1
+      },
+      "objectives": [
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Meadow"
+        },
+        {
+          "metric": "FrozenCrops",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Barley"
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 5,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 4,
+      "flourishStrokes": 4,
+      "flourishCells": 38,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        }
+      ],
+      "id": "c7-4",
+      "chapter": 7,
+      "name": "Thawgate",
+      "brief": "Snow on the gate, water in the pool, and the barley untouched.",
+      "hint": "Cold belongs at the top of the map. Everything you want warm should be far below it.",
+      "map": [
+        "^^^^^^^^",
+        "^^^^^^^^",
+        "sssmmsss",
+        "mmmmmmmm",
+        "mm~~~~mm",
+        "mmmmmmmm",
+        "mmRRRRmm",
+        "mmRRRRmm",
+        "mmmmmmmm",
+        "TTccccTT",
+        "mmmmmmmm",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "44444444",
+        "44444444",
+        "33333333",
+        "22222222",
+        "22222222",
+        "11111111",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111"
+      ],
+      "threads": {
+        "WarmFront": 2,
+        "ColdFront": 1,
+        "MoistureRibbon": 1
+      },
+      "objectives": [
+        {
+          "metric": "SnowTiles",
+          "cmp": "Gte",
+          "target": 8,
+          "label": "Gate snow"
+        },
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Pool"
+        },
+        {
+          "metric": "FrozenCrops",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Barley"
+        }
+      ]
+    },
+    {
+      "baseTemp": 0,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 52,
+      "maxThreadCells": 18,
+      "bloomStrokes": 3,
+      "flourishStrokes": 3,
+      "flourishCells": 34,
+      "reward": "galeflax",
+      "solution": [
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            4
+          ],
+          "to": [
+            7,
+            4
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            5,
+            0
+          ],
+          "to": [
+            5,
+            11
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            0,
+            11
+          ]
+        }
+      ],
+      "id": "c8-1",
+      "chapter": 8,
+      "name": "Braided Gale",
+      "brief": "Four mills, two ridges, one stubborn fog.",
+      "hint": "Wind spills one tile either side of the band. Two bands can cover four rows.",
+      "map": [
+        "TTmmmmTT",
+        "mWmmmmWm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mm----mm",
+        "mhvvvhmm",
+        "mm----mm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mWmmmmWm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "fog": [
+        "00000000",
+        "00000000",
+        "00000000",
+        "01111100",
+        "02222200",
+        "02222200",
+        "02222200",
+        "01111100",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "threads": {
+        "WindBand": 3
+      },
+      "objectives": [
+        {
+          "metric": "WindmillTicks",
+          "cmp": "Gte",
+          "target": 20,
+          "label": "Mills",
+          "everyWindmill": true
+        },
+        {
+          "metric": "VillageFog",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Village"
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 4,
+      "flourishStrokes": 3,
+      "flourishCells": 34,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            4,
+            0
+          ],
+          "to": [
+            4,
+            11
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            5
+          ],
+          "to": [
+            7,
+            5
+          ]
+        }
+      ],
+      "id": "c8-2",
+      "chapter": 8,
+      "name": "Leeward Fields",
+      "brief": "The flowers sit in the lee of the crag. Bring the rain over to them.",
+      "hint": "Wind pushes cloud one tile a beat. Make the cloud upwind of where you want it to fall.",
+      "map": [
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "ss^^^^ss",
+        "ss^^^^ss",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mfmffmfm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmh-hmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "11111111",
+        "11111111",
+        "33333333",
+        "33333333",
+        "11111111",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1,
+        "WindBand": 1,
+        "MoistureRibbon": 1
+      },
+      "objectives": [
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Lee flowers"
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 5,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 4,
+      "flourishStrokes": 4,
+      "flourishCells": 38,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            6
+          ],
+          "to": [
+            7,
+            6
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            9
+          ],
+          "to": [
+            7,
+            9
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        }
+      ],
+      "id": "c8-3",
+      "chapter": 8,
+      "name": "Turning Weather",
+      "brief": "Keep the mills turning while the cistern fills. Neither can wait.",
+      "hint": "A wind band is not only for mills. It moves your rain as well.",
+      "map": [
+        "TTmmmmTT",
+        "mWmmmmWm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mm~~~~mm",
+        "mmmmmmmm",
+        "mmRRRRmm",
+        "mmRRRRmm",
+        "mmmmmmmm",
+        "TTh--hTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "22222222",
+        "22222222",
+        "22222222",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "11111111"
+      ],
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1,
+        "WindBand": 1,
+        "MoistureRibbon": 1
+      },
+      "objectives": [
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Cistern"
+        },
+        {
+          "metric": "WindmillTicks",
+          "cmp": "Gte",
+          "target": 18,
+          "label": "Mills",
+          "everyWindmill": true
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 4,
+      "flourishStrokes": 3,
+      "flourishCells": 34,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            4,
+            11
+          ],
+          "to": [
+            7,
+            11
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            8
+          ],
+          "to": [
+            7,
+            8
+          ]
+        }
+      ],
+      "id": "c8-4",
+      "chapter": 8,
+      "name": "Squall Line",
+      "brief": "Soak the marsh. The cottages on the bank must stay above the water.",
+      "hint": "Deep water spreads sideways. Keep the deepest part of the storm away from the bank.",
+      "map": [
+        "TTmmmmTT",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mwwwwwwm",
+        "mwwwwwwm",
+        "mwwwwwwm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mh-mm-hm",
+        "mmmmmmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "22222222",
+        "22222222",
+        "22222222",
+        "00000000",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "22222222",
+        "22222222",
+        "22222222",
+        "22222222"
+      ],
+      "threads": {
+        "WarmFront": 1,
+        "ColdFront": 1,
+        "WindBand": 1,
+        "MoistureRibbon": 1
+      },
+      "objectives": [
+        {
+          "metric": "WetlandWater",
+          "cmp": "Gte",
+          "target": 12,
+          "label": "Marsh"
+        },
+        {
+          "metric": "FloodedTiles",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Cottages"
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 4,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 5,
+      "flourishStrokes": 4,
+      "flourishCells": 42,
+      "reward": "loomstar",
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            2
+          ],
+          "to": [
+            7,
+            2
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            4
+          ],
+          "to": [
+            7,
+            4
+          ]
+        }
+      ],
+      "id": "c9-1",
+      "chapter": 9,
+      "name": "Glass Terrace",
+      "brief": "Flowers on the terrace, water in the trough, mills turning above.",
+      "hint": "Solve the highest thing first. What you make up there arrives everywhere below.",
+      "map": [
+        "TTmmmmTT",
+        "mWmmmmWm",
+        "mmmmmmmm",
+        "mfmmmmfm",
+        "mmmmmmmm",
+        "mmfmmfmm",
+        "mm~~~~mm",
+        "mmRRRRmm",
+        "mmmmmmmm",
+        "TTh--hTT",
+        "mmmmmmmm",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "22222222",
+        "22222222",
+        "22222222",
+        "11111111",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111"
+      ],
+      "threads": {
+        "WarmFront": 2,
+        "ColdFront": 1,
+        "WindBand": 1,
+        "MoistureRibbon": 1
+      },
+      "objectives": [
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Terrace"
+        },
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 3,
+          "label": "Trough"
+        },
+        {
+          "metric": "WindmillTicks",
+          "cmp": "Gte",
+          "target": 15,
+          "label": "Mills",
+          "everyWindmill": true
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 8,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 5,
+      "flourishStrokes": 4,
+      "flourishCells": 42,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            8
+          ],
+          "to": [
+            7,
+            8
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        }
+      ],
+      "id": "c9-2",
+      "chapter": 9,
+      "name": "The Cold Braid",
+      "brief": "Snow above, blooms below, and a hard line between them.",
+      "hint": "Warm and cold cancel where they overlap. That is a tool, not a mistake.",
+      "map": [
+        "^^^^^^^^",
+        "ssssssss",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mmmmmmmm",
+        "mfmffmfm",
+        "mmmmmmmm",
+        "mmccccmm",
+        "mmmmmmmm",
+        "mmh-hmmm",
+        "TTmmmmTT",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "44444444",
+        "33333333",
+        "22222222",
+        "22222222",
+        "22222222",
+        "11111111",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "00000000",
+        "00000000"
+      ],
+      "threads": {
+        "WarmFront": 2,
+        "ColdFront": 1,
+        "MoistureRibbon": 2
+      },
+      "objectives": [
+        {
+          "metric": "SnowTiles",
+          "cmp": "Gte",
+          "target": 6,
+          "label": "Ridge snow"
+        },
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Meadow"
+        },
+        {
+          "metric": "FrozenCrops",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Barley"
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 4,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 6,
+      "flourishStrokes": 5,
+      "flourishCells": 48,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            8
+          ],
+          "to": [
+            7,
+            8
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            4,
+            7
+          ],
+          "to": [
+            7,
+            7
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            7
+          ],
+          "to": [
+            4,
+            7
+          ]
+        }
+      ],
+      "id": "c9-3",
+      "chapter": 9,
+      "name": "Everything at Once",
+      "brief": "Mills, marsh, cistern and blooms. The hollow is asking for all of it.",
+      "hint": "Read the objectives in height order and weave from the top down.",
+      "map": [
+        "mWmmmmWm",
+        "mmmmmmmm",
+        "mfmmmmfm",
+        "mmmmmmmm",
+        "mwwwwwwm",
+        "mwwwwwwm",
+        "mm~~~~mm",
+        "mmRRRRmm",
+        "mmmmmmmm",
+        "TTh--hTT",
+        "mmmmmmmm",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "33333333",
+        "33333333",
+        "22222222",
+        "22222222",
+        "11111111",
+        "11111111",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "11111111",
+        "11111111"
+      ],
+      "threads": {
+        "WarmFront": 2,
+        "ColdFront": 1,
+        "WindBand": 1,
+        "MoistureRibbon": 2
+      },
+      "objectives": [
+        {
+          "metric": "WetlandWater",
+          "cmp": "Gte",
+          "target": 8,
+          "label": "Marsh"
+        },
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 3,
+          "label": "Cistern"
+        },
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 2,
+          "label": "Banks"
+        },
+        {
+          "metric": "WindmillTicks",
+          "cmp": "Gte",
+          "target": 15,
+          "label": "Mills",
+          "everyWindmill": true
+        }
+      ]
+    },
+    {
+      "baseTemp": 1,
+      "startMoisture": 0,
+      "startReservoir": 0,
+      "reservoirCapacity": 4,
+      "bloomTempRange": [
+        0,
+        2
+      ],
+      "riverFlow": "South",
+      "beats": 60,
+      "maxThreadCells": 18,
+      "bloomStrokes": 6,
+      "flourishStrokes": 5,
+      "flourishCells": 50,
+      "reward": null,
+      "solution": [
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "WarmFront",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        },
+        {
+          "type": "ColdFront",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "WindBand",
+          "from": [
+            0,
+            1
+          ],
+          "to": [
+            7,
+            1
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            0
+          ],
+          "to": [
+            7,
+            0
+          ]
+        },
+        {
+          "type": "MoistureRibbon",
+          "from": [
+            0,
+            3
+          ],
+          "to": [
+            7,
+            3
+          ]
+        }
+      ],
+      "id": "c9-4",
+      "chapter": 9,
+      "name": "The Last Loom",
+      "brief": "One hollow, every rule, nothing spare.",
+      "hint": "There is no thread here you do not need. Place the one with the fewest options first.",
+      "map": [
+        "^^^^^^^^",
+        "sssmmsss",
+        "mWmmmmWm",
+        "mmmmmmmm",
+        "mfmmmmfm",
+        "mmm~~mmm",
+        "mmm~~mmm",
+        "mmRRRRmm",
+        "mmmmmmmm",
+        "TTccccTT",
+        "mmh--hmm",
+        "mmmmmmmm"
+      ],
+      "elevation": [
+        "55555555",
+        "44444444",
+        "33333333",
+        "33333333",
+        "22222222",
+        "22222222",
+        "22222222",
+        "00000000",
+        "00000000",
+        "11111111",
+        "11111111",
+        "11111111"
+      ],
+      "threads": {
+        "WarmFront": 2,
+        "ColdFront": 1,
+        "WindBand": 1,
+        "MoistureRibbon": 2
+      },
+      "objectives": [
+        {
+          "metric": "SnowTiles",
+          "cmp": "Gte",
+          "target": 4,
+          "label": "Pike snow"
+        },
+        {
+          "metric": "ReservoirWater",
+          "cmp": "Gte",
+          "target": 3,
+          "label": "Pool"
+        },
+        {
+          "metric": "BloomedFlowers",
+          "cmp": "Gte",
+          "target": 2,
+          "label": "Ledge"
+        },
+        {
+          "metric": "WindmillTicks",
+          "cmp": "Gte",
+          "target": 15,
+          "label": "Mills",
+          "everyWindmill": true
+        },
+        {
+          "metric": "FrozenCrops",
+          "cmp": "Lte",
+          "target": 0,
+          "label": "Barley"
+        }
+      ]
+    }
+  ],
+  "collectibles": [
+    {
+      "id": "rainbell",
+      "name": "Rainbell Flower",
+      "flavour": "Opens only while rain is falling. Closes the moment the sky clears, as if embarrassed.",
+      "unlock": "Solve Millbrook Hollow",
+      "biome": "Hollows"
+    },
+    {
+      "id": "frostfern",
+      "name": "Frost Fern",
+      "flavour": "Grows a new frond for every freezing night. Glitters when the terrarium runs cold.",
+      "unlock": "Solve Coldpike Summit",
+      "biome": "High Country"
+    },
+    {
+      "id": "cloudmoss",
+      "name": "Cloud Moss",
+      "flavour": "Drinks straight from the air. Will not tolerate being watered directly.",
+      "unlock": "Solve Stonebrook Basin",
+      "biome": "Basins"
+    },
+    {
+      "id": "sunlace",
+      "name": "Sunlace Clover",
+      "flavour": "Turns its face through the day. Weavers say a field of it can be read like a clock.",
+      "unlock": "Solve Bellhollow Meadow",
+      "biome": "Meadows"
+    },
+    {
+      "id": "mistcap",
+      "name": "Mistcap Mushroom",
+      "flavour": "Appears overnight wherever fog has recently lifted. Never where it lingers.",
+      "unlock": "Solve Hush Village",
+      "biome": "Villages"
+    },
+    {
+      "id": "windreed",
+      "name": "Wind Reed",
+      "flavour": "Sways even in still air, keeping time with a breeze that passed some days ago.",
+      "unlock": "Solve Windmere Downs",
+      "biome": "Downs"
+    },
+    {
+      "id": "thawlily",
+      "name": "Thaw Lily",
+      "flavour": "Flowers in the puddle a snowdrift leaves behind, and never anywhere else.",
+      "unlock": "Solve Snowmelt Steps",
+      "biome": "Thaw"
+    },
+    {
+      "id": "galeflax",
+      "name": "Gale Flax",
+      "flavour": "Its fibres lie flat in the direction of the last strong wind. Weavers use it as a compass.",
+      "unlock": "Solve Braided Gale",
+      "biome": "Ridges"
+    },
+    {
+      "id": "loomstar",
+      "name": "Loomstar",
+      "flavour": "Six petals, each opening to a different condition. Nobody has seen all six at once.",
+      "unlock": "Solve Glass Terrace",
+      "biome": "Trials"
+    }
+  ]
+}

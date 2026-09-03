@@ -125,7 +125,7 @@ To install it on a connected device or running emulator:
 ```
 
 > [!NOTE]
-> The current `release` build type uses debug signing for development. Configure a production keystore before publishing the app.
+> The `release` build is intentionally **not** debug-signed. Configure a production upload/release keystore before publishing; never ship a debug-signed release artifact.
 
 ## Validate the puzzle library
 
@@ -135,7 +135,7 @@ Run the validator from the repository root:
 python tools/validate_levels.py
 ```
 
-The validator mirrors the Kotlin simulation headlessly and checks that every authored level is solvable by its canonical solution. When simulation rules change, keep `SimulationEngine.kt` and `tools/validate_levels.py` in sync.
+The validator mirrors the Kotlin simulation headlessly, checks every authored level's canonical solution, and verifies all deterministic daily-forecast variants. When simulation rules change, keep `SimulationEngine.kt` and `tools/validate_levels.py` in sync.
 
 ## Design principles
 

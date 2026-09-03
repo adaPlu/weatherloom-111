@@ -45,7 +45,9 @@ data class PuzzleUiState(
     val inspectCell: Int? = null,
     val showTemperature: Boolean = false,
     val hintShown: Boolean = false,
-    val isDaily: Boolean = false
+    val isDaily: Boolean = false,
+    val simulating: Boolean = false,
+    val simulatedThreads: List<WeatherThread> = emptyList()
 ) {
     val remaining: Map<ThreadType, Int>
         get() {
@@ -54,7 +56,7 @@ data class PuzzleUiState(
             return lvl.threads.mapValues { (type, n) -> n - (used[type] ?: 0) }
         }
 
-    val canSimulate: Boolean get() = threads.isNotEmpty()
+    val canSimulate: Boolean get() = threads.isNotEmpty() && !simulating
 
     /** The state the board should render right now. */
     fun frame(): SimState? {
@@ -74,6 +76,7 @@ data class PuzzleUiState(
     }
 
     val strokeCells: Int get() = threads.sumOf { it.cells.size }
+    val simulatedStrokeCells: Int get() = simulatedThreads.sumOf { it.cells.size }
 }
 
 /** Owns one puzzle attempt: drawing, running the sim, scrubbing it, and scoring it. */
@@ -84,7 +87,6 @@ class PuzzleViewModel(app: Application) : AndroidViewModel(app) {
     val ui: StateFlow<PuzzleUiState> = _ui.asStateFlow()
 
     private var playJob: Job? = null
-    private var baseState: SimState? = null
     private var lastScoredBeat = -1
 
     init {
@@ -102,7 +104,6 @@ class PuzzleViewModel(app: Application) : AndroidViewModel(app) {
         } else {
             LevelLibrary.level(levelId)
         } ?: return
-        baseState = SimulationEngine.initialState(level)
         // First hollow ever opened: lead with the rule rather than let them flounder.
         val firstEver = !daily &&
             LevelLibrary.indexOf(level.id) == 0 &&
@@ -117,11 +118,13 @@ class PuzzleViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun arm(type: ThreadType) {
+        if (_ui.value.simulating) return
         _ui.value = _ui.value.copy(armed = type)
     }
 
     fun addThread(thread: WeatherThread) {
         val s = _ui.value
+        if (s.simulating) return
         val level = s.level ?: return
         val used = s.threads.count { it.type == thread.type }
         val budget = level.threads[thread.type] ?: 0
@@ -138,6 +141,7 @@ class PuzzleViewModel(app: Application) : AndroidViewModel(app) {
 
     fun undo() {
         val s = _ui.value
+        if (s.simulating) return
         val last = s.threads.lastOrNull() ?: return
         _ui.value = s.copy(
             threads = s.threads.dropLast(1),
@@ -148,13 +152,14 @@ class PuzzleViewModel(app: Application) : AndroidViewModel(app) {
 
     fun redo() {
         val s = _ui.value
+        if (s.simulating) return
         val last = s.redoStack.lastOrNull() ?: return
         _ui.value = s.copy(threads = s.threads + last, redoStack = s.redoStack.dropLast(1))
     }
 
     fun clear() {
         val s = _ui.value
-        if (s.threads.isEmpty()) return
+        if (s.simulating || s.threads.isEmpty()) return
         _ui.value = s.copy(
             threads = emptyList(),
             redoStack = emptyList(),
@@ -176,6 +181,7 @@ class PuzzleViewModel(app: Application) : AndroidViewModel(app) {
 
     /** Reveals the canonical solution, for when a player is truly stuck. */
     fun revealSolution() {
+        if (_ui.value.simulating) return
         val level = _ui.value.level ?: return
         if (level.solution.isEmpty()) return
         val threads = level.solution.map { s ->
@@ -198,15 +204,26 @@ class PuzzleViewModel(app: Application) : AndroidViewModel(app) {
     fun simulate() {
         val s = _ui.value
         val level = s.level ?: return
-        if (s.threads.isEmpty()) return
+        if (s.threads.isEmpty() || s.simulating) return
+
+        // Freeze the attempt before leaving the main thread. A simulation result must
+        // always be scored against the exact weave that produced it.
+        val runThreads = s.threads.toList()
         repo.recordAttempt(level.id)
         LoomAudio.play(Sfx.LoomStart)
         lastScoredBeat = -1
+        _ui.value = s.copy(simulating = true, simulatedThreads = emptyList())
+
         viewModelScope.launch {
             val result = withContext(Dispatchers.Default) {
-                SimulationEngine.run(level, s.threads)
+                SimulationEngine.run(level, runThreads)
             }
-            _ui.value = _ui.value.copy(
+            val current = _ui.value
+            if (current.level?.id != level.id) return@launch
+            _ui.value = current.copy(
+                threads = runThreads,
+                simulatedThreads = runThreads,
+                simulating = false,
                 result = result,
                 phase = Phase.Playback,
                 beat = 0,
@@ -278,15 +295,17 @@ class PuzzleViewModel(app: Application) : AndroidViewModel(app) {
         val s = _ui.value
         val level = s.level ?: return
         val result = s.result ?: return
+        val scoredThreads = s.simulatedThreads.ifEmpty { s.threads }
+        val scoredCells = scoredThreads.sumOf { it.cells.size }
         val rating = when {
             !result.solved -> Rating.None
-            s.threads.size <= level.flourishStrokes && s.strokeCells <= level.flourishCells -> Rating.Flourish
-            s.threads.size <= level.bloomStrokes -> Rating.Bloom
+            scoredThreads.size <= level.flourishStrokes && scoredCells <= level.flourishCells -> Rating.Flourish
+            scoredThreads.size <= level.bloomStrokes -> Rating.Bloom
             else -> Rating.Seedling
         }
         var unlocked: String? = null
         if (result.solved && !s.isDaily) {
-            val newly = repo.recordSolve(level.id, rating, s.threads.size, s.strokeCells, level.reward)
+            val newly = repo.recordSolve(level.id, rating, scoredThreads.size, scoredCells, level.reward)
             if (newly) unlocked = level.reward
         }
         if (result.solved && s.isDaily) {
@@ -331,6 +350,7 @@ class PuzzleViewModel(app: Application) : AndroidViewModel(app) {
             playing = false,
             beat = 0,
             result = null,
+            simulatedThreads = emptyList(),
             inspectCell = null
         )
     }

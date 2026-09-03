@@ -49,16 +49,17 @@ class SimState(val size: Int) {
         return other
     }
 
-    /** Order-independent fingerprint used to prove replays are deterministic. */
+    /** Complete deterministic fingerprint used to prove replay equivalence. */
     fun hash(): Long {
         var h = 1125899906842597L
         fun mix(a: IntArray) {
             for (v in a) h = h * 31 + v
         }
         mix(temp); mix(moisture); mix(cloud); mix(water); mix(storage)
-        mix(snow); mix(fog); mix(windDir); mix(windStr); mix(bloom)
-        mix(freeze); mix(frozen); mix(precip); mix(precipSnow); mix(windmillTicks)
+        mix(snow); mix(fog); mix(windDir); mix(windStr); mix(bloom); mix(bloomTimer)
+        mix(freeze); mix(frozen); mix(precip); mix(precipSnow); mix(windmillTicks); mix(spinning)
         h = h * 31 + if (overflowed) 1 else 0
+        h = h * 31 + beat
         return h
     }
 }

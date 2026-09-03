@@ -5,6 +5,7 @@ Run: python3 tools/validate_levels.py
 Every level must be solved by its canonical solution, otherwise the content is broken.
 Keep this file in lockstep with core/sim/SimulationEngine.kt.
 """
+import copy
 import json
 import sys
 from pathlib import Path
@@ -51,14 +52,18 @@ class Level:
                 t, f = CHARS[ch]
                 self.terrain.append(t)
                 self.feature.append(f)
-        for row in d["elevation"]:
+        assert len(d["elevation"]) == self.height, f'{d["id"]} elevation height'
+        for y, row in enumerate(d["elevation"]):
+            assert len(row) == self.width, f'{d["id"]} elevation row {y} width'
             for ch in row:
                 self.elev.append(int(ch))
         fog = d.get("fog")
         self.start_fog = [0] * self.size
         if fog:
+            assert len(fog) == self.height, f'{d["id"]} fog height'
             i = 0
-            for row in fog:
+            for y, row in enumerate(fog):
+                assert len(row) == self.width, f'{d["id"]} fog row {y} width'
                 for ch in row:
                     self.start_fog[i] = int(ch)
                     i += 1
@@ -107,6 +112,11 @@ def initial_state(lv):
         s.fog[i] = lv.start_fog[i]
         s.water[i] = 1 if t == "River" else 0
         s.storage[i] = lv.startReservoir if t == "Reservoir" else 0
+        s.snow[i] = 1 if (
+            t == "Mountain"
+            and getattr(lv, "startSnowSummits", False)
+            and lv.elev[i] >= 3
+        ) else 0
     return s
 
 
@@ -426,6 +436,69 @@ def run(lv, threads):
     return s, events
 
 
+DAILY_TEMPLATE_IDS = ["c1-1", "c1-3", "c2-2", "c3-1", "c4-1", "c5-1", "c6-1"]
+
+
+def canonical_threads(lv, d):
+    threads = []
+    for st in d["solution"]:
+        a, b = tuple(st["from"]), tuple(st["to"])
+        threads.append({
+            "type": st["type"],
+            "cells": line_cells(lv, a, b),
+            "dir": stroke_dir(a, b),
+        })
+    return threads
+
+
+def spec_met(value, spec):
+    cmp_ = spec["cmp"]
+    if cmp_ == "Eq":
+        return value == spec["target"]
+    if cmp_ == "Gte":
+        return value >= spec["target"]
+    return value <= spec["target"]
+
+
+def canonical_solves(d):
+    lv = Level(d)
+    s, _ = run(lv, canonical_threads(lv, d))
+    return all(spec_met(measure(lv, s, spec), spec) for spec in d["objectives"])
+
+
+def daily_variant(template, variant):
+    d = copy.deepcopy(template)
+    if variant == 1:
+        for spec in d["objectives"]:
+            if (
+                spec["cmp"] == "Gte"
+                and spec["target"] > 2
+                and spec["metric"] != "WindmillTicks"
+            ):
+                spec["target"] -= 1
+    elif variant == 2:
+        d["threads"] = {name: count + 1 for name, count in d["threads"].items()}
+    return d
+
+
+def validate_daily_variants(data):
+    by_id = {d["id"]: d for d in data["levels"]}
+    ok = True
+    print("DAILY FORECAST VARIANTS")
+    for level_id in DAILY_TEMPLATE_IDS:
+        template = by_id.get(level_id)
+        if template is None:
+            print(f"FAIL  {level_id:6} missing daily template")
+            ok = False
+            continue
+        for variant in range(3):
+            d = daily_variant(template, variant)
+            passed = canonical_solves(d)
+            print(f'{"PASS" if passed else "FAIL"}  {level_id:6} variant {variant}')
+            ok &= passed
+    return ok
+
+
 def main():
     data = json.loads(LEVELS.read_text())
     ok = True
@@ -463,6 +536,8 @@ def main():
         print(f'{flag}  {d["id"]:6} {d["name"]:20} | ' + " | ".join(results))
         if not solved:
             print("        events:", events[:8])
+    print()
+    ok &= validate_daily_variants(data)
     print()
     print("ALL LEVELS VALID" if ok else "CONTENT BROKEN")
     return 0 if ok else 1

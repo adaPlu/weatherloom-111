@@ -44,22 +44,19 @@ object DailyForecast {
 
     /**
      * Deterministic per-day mutation of a validated template. Mutations only ever
-     * loosen a target or trim the thread budget by one where a spare exists, so the
-     * template's canonical solution keeps working.
+     * loosen a target or add thread budget, so the template's canonical solution
+     * remains valid by construction.
      */
     fun forDay(key: String): Level? {
         val seed = key.fold(0L) { acc, c -> acc * 131 + c.code }
-        val template = LevelLibrary.level(templateIds[(seed % templateIds.size).toInt().coerceAtLeast(0)])
-            ?: return null
+        val templateIndex = Math.floorMod(seed, templateIds.size.toLong()).toInt()
+        val template = LevelLibrary.level(templateIds[templateIndex]) ?: return null
 
-        val variant = ((seed / 7) % 3).toInt()
+        val variant = Math.floorMod(seed / 7, 3L).toInt()
         val objectives = template.objectives.map { spec ->
             when {
                 variant == 1 && spec.cmp == Cmp.Gte && spec.target > 2 && spec.metric != Metric.WindmillTicks ->
                     spec.copy(target = spec.target - 1)
-
-                variant == 2 && spec.cmp == Cmp.Gte && spec.metric == Metric.WindmillTicks ->
-                    spec.copy(target = spec.target + 5)
 
                 else -> spec
             }
@@ -83,7 +80,7 @@ object DailyForecast {
 
     fun blurb(variant: Int): String = when (variant) {
         1 -> "A gentler sky today."
-        2 -> "One extra thread, one stubborn objective."
+        2 -> "The loom lends you one extra thread of each kind."
         else -> "The board as the loom first wove it."
     }
 }

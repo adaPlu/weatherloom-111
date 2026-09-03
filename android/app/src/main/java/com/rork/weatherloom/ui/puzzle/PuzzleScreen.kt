@@ -186,7 +186,7 @@ fun PuzzleDrawScreen(
                     threads = ui.threads,
                     phase = phase,
                     modifier = Modifier.fillMaxSize(),
-                    armedThread = ui.armed?.takeIf { (ui.remaining[it] ?: 0) > 0 },
+                    armedThread = ui.armed?.takeIf { !ui.simulating && (ui.remaining[it] ?: 0) > 0 },
                     showTemperature = ui.showTemperature,
                     reducedMotion = reducedMotion,
                     onStrokeComplete = { stroke ->
@@ -206,9 +206,10 @@ fun PuzzleDrawScreen(
             )
 
             ActionBar(
-                canUndo = ui.threads.isNotEmpty(),
-                canRedo = ui.redoStack.isNotEmpty(),
+                canUndo = ui.threads.isNotEmpty() && !ui.simulating,
+                canRedo = ui.redoStack.isNotEmpty() && !ui.simulating,
                 canSimulate = ui.canSimulate,
+                simulating = ui.simulating,
                 onUndo = {
                     LoomAudio.play(Sfx.Tap, 0.7f)
                     onUndo()
@@ -245,13 +246,14 @@ private fun ThreadPalette(ui: PuzzleUiState, onArm: (ThreadType) -> Unit) {
     ) {
         order.forEach { type ->
             val left = ui.remaining[type] ?: 0
-            val selected = ui.armed == type && left > 0
+            val available = left > 0 && !ui.simulating
+            val selected = ui.armed == type && available
             val tint = type.ribbonColor().let {
                 if (type == ThreadType.WindBand) Loom.WindInk else it
             }
             Surface(
-                onClick = { if (left > 0) onArm(type) },
-                enabled = left > 0,
+                onClick = { if (available) onArm(type) },
+                enabled = available,
                 shape = RoundedCornerShape(50),
                 color = if (selected) tint.copy(alpha = 0.14f) else Loom.Surface,
                 border = BorderStroke(
@@ -286,6 +288,7 @@ private fun ActionBar(
     canUndo: Boolean,
     canRedo: Boolean,
     canSimulate: Boolean,
+    simulating: Boolean,
     onUndo: () -> Unit,
     onRedo: () -> Unit,
     onClear: () -> Unit,
@@ -303,7 +306,7 @@ private fun ActionBar(
         RoundAction(Icons.Rounded.CleaningServices, "Clear all threads", canUndo, onClear)
         Spacer(Modifier.width(2.dp))
         LoomButton(
-            text = "Simulate",
+            text = if (simulating) "Simulating…" else "Simulate",
             onClick = onSimulate,
             enabled = canSimulate,
             icon = Icons.Rounded.PlayArrow,

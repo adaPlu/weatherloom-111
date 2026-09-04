@@ -28,7 +28,7 @@ class PuzzleSolveServiceTest {
     )
 
     @Test
-    fun solvedPuzzleUpdatesProgressCollectibleAndTerrariumInventoryAtomically() {
+    fun solvedPuzzleUpdatesProgressXpCollectibleAndTerrariumInventoryAtomically() {
         val service = PuzzleSolveService(PuzzleRewardBridge(catalog))
 
         val result = service.recordSolve(
@@ -41,10 +41,71 @@ class PuzzleSolveServiceTest {
         )
 
         assertEquals(Rating.Seedling, result.save.levels.getValue("c1-1").ratingEnum)
+        assertEquals(100, result.save.playerProgression.xp)
+        assertEquals(100, result.save.playerProgression.awardedLevelXp.getValue("c1-1"))
+        assertEquals(100, result.xpGranted)
         assertEquals(listOf("sunlace"), result.save.collectibles)
         assertEquals("sunlace", result.save.lastCollectible)
         assertTrue(result.save.terrariumInventory.owns("sunlace"))
         assertTrue(result.newlyUnlockedCollectible)
         assertTrue(result.newTerrariumItem)
+    }
+
+    @Test
+    fun solveReplayCannotFarmXpAndBetterRatingsGrantOnlyTheirDifference() {
+        val service = PuzzleSolveService(PuzzleRewardBridge(catalog))
+        val first = service.recordSolve(
+            save = SaveData(),
+            levelId = "c1-1",
+            rating = Rating.Seedling,
+            strokes = 4,
+            cells = 18,
+            rewardId = "sunlace"
+        )
+
+        val repeated = service.recordSolve(
+            save = first.save,
+            levelId = "c1-1",
+            rating = Rating.Seedling,
+            strokes = 4,
+            cells = 18,
+            rewardId = "sunlace"
+        )
+        assertEquals(100, repeated.save.playerProgression.xp)
+        assertEquals(0, repeated.xpGranted)
+
+        val bloom = service.recordSolve(
+            save = repeated.save,
+            levelId = "c1-1",
+            rating = Rating.Bloom,
+            strokes = 3,
+            cells = 15,
+            rewardId = "sunlace"
+        )
+        assertEquals(150, bloom.save.playerProgression.xp)
+        assertEquals(50, bloom.xpGranted)
+
+        val lowerReplay = service.recordSolve(
+            save = bloom.save,
+            levelId = "c1-1",
+            rating = Rating.Seedling,
+            strokes = 5,
+            cells = 20,
+            rewardId = "sunlace"
+        )
+        assertEquals(150, lowerReplay.save.playerProgression.xp)
+        assertEquals(0, lowerReplay.xpGranted)
+
+        val flourish = service.recordSolve(
+            save = lowerReplay.save,
+            levelId = "c1-1",
+            rating = Rating.Flourish,
+            strokes = 2,
+            cells = 12,
+            rewardId = "sunlace"
+        )
+        assertEquals(200, flourish.save.playerProgression.xp)
+        assertEquals(50, flourish.xpGranted)
+        assertEquals(Rating.Flourish, flourish.save.levels.getValue("c1-1").ratingEnum)
     }
 }

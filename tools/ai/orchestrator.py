@@ -103,6 +103,70 @@ async def run_parallel(
     return list(await asyncio.gather(*(runner(item) for item in items)))
 
 
+def _integration_artifact(items: Sequence[WorkItem], results: Sequence[PairResult]) -> str:
+    by_id = {item.id: item for item in items}
+    blocks: list[str] = []
+    for result in sorted(results, key=lambda value: value.work_item_id):
+        item = by_id[result.work_item_id]
+        invariants = "\n".join(f"- {value}" for value in item.invariants) or "- none"
+        targets = "\n".join(f"- {value}" for value in item.targets) or "- none"
+        blocks.append(
+            "\n".join(
+                (
+                    f"WORK ITEM {item.id}",
+                    f"worker={item.worker_role}",
+                    f"reviewer={item.reviewer_role}",
+                    f"pair_verdict={result.review.verdict}",
+                    f"attempts={result.attempts}",
+                    "targets:",
+                    targets,
+                    "invariants:",
+                    invariants,
+                    "artifact:",
+                    result.artifact,
+                )
+            )
+        )
+    return "\n\n---\n\n".join(blocks)
+
+
+async def run_checkpoint(
+    items: Sequence[WorkItem],
+    pair_runner: Callable[[WorkItem], Awaitable[PairResult]],
+    integration_reviewer: ReviewerRun,
+) -> tuple[list[PairResult], ReviewResult]:
+    """Run independent pairs, then require IntegrationGraphAdversary approval before promotion."""
+    if not items:
+        raise ReviewRejected("checkpoint cannot promote an empty work set")
+
+    results = await run_parallel(items, pair_runner)
+    if any(result.review.verdict != "APPROVED" for result in results):
+        raise ReviewRejected("checkpoint contains work without pair-level APPROVED review")
+
+    targets = tuple(sorted({target for item in items for target in item.targets}))
+    invariants = tuple(sorted({value for item in items for value in item.invariants}))
+    integration_item = WorkItem(
+        id="checkpoint-integration",
+        worker_role="Orchestrator",
+        reviewer_role="IntegrationGraphAdversary",
+        prompt="Challenge the converged Weatherloom checkpoint before promotion.",
+        targets=targets,
+        invariants=invariants,
+    )
+    validate_pair(integration_item.worker_role, integration_item.reviewer_role)
+
+    integration_review = await integration_reviewer(
+        integration_item,
+        _integration_artifact(items, results),
+    )
+    if integration_review.verdict != "APPROVED":
+        raise ReviewRejected(
+            "IntegrationGraphAdversary did not approve checkpoint convergence"
+        )
+
+    return results, integration_review
+
+
 async def live_worker(item: WorkItem, feedback: str | None = None) -> str:
     pair = validate_pair(item.worker_role, item.reviewer_role)
     model = configured_model(pair.model_class)

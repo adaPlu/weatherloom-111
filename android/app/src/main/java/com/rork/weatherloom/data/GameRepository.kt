@@ -5,6 +5,7 @@ import android.content.SharedPreferences
 import com.rork.weatherloom.core.level.LevelLibrary
 import com.rork.weatherloom.core.terrarium.GrowthState
 import com.rork.weatherloom.core.terrarium.PlayerInventory
+import com.rork.weatherloom.core.terrarium.TerrariumCatalog
 import com.rork.weatherloom.core.terrarium.TerrariumLayout
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -51,6 +52,13 @@ class GameRepository private constructor(context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("weatherloom", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    private val puzzleSolveService = PuzzleSolveService(
+        PuzzleRewardBridge(
+            TerrariumCatalog.decode(
+                context.assets.open("terrarium_items.json").bufferedReader().use { it.readText() }
+            )
+        )
+    )
 
     private val _save = MutableStateFlow(read())
     val save: StateFlow<SaveData> = _save.asStateFlow()
@@ -78,23 +86,18 @@ class GameRepository private constructor(context: Context) {
         }
     }
 
-    /** Stores a win, upgrades the rating if it improved, and grants the level's collectible. */
+    /** Stores a win, upgrades the rating, and atomically grants its Terrarium reward. */
     fun recordSolve(levelId: String, rating: Rating, strokes: Int, cells: Int, reward: String?): Boolean =
         mutator.mutateWithResult { current ->
-            val rec = current.levels[levelId] ?: LevelRecord()
-            val best = maxOf(rec.rating, rating.ordinal)
-            val newRec = rec.copy(
-                rating = best,
-                bestStrokes = if (rec.bestStrokes == 0) strokes else minOf(rec.bestStrokes, strokes),
-                bestCells = if (rec.bestCells == 0) cells else minOf(rec.bestCells, cells)
+            val result = puzzleSolveService.recordSolve(
+                save = current,
+                levelId = levelId,
+                rating = rating,
+                strokes = strokes,
+                cells = cells,
+                rewardId = reward
             )
-            val newlyUnlocked = reward != null && reward !in current.collectibles
-            val next = current.copy(
-                levels = current.levels + (levelId to newRec),
-                collectibles = if (newlyUnlocked) current.collectibles + reward!! else current.collectibles,
-                lastCollectible = if (newlyUnlocked) reward else current.lastCollectible
-            )
-            next to newlyUnlocked
+            result.save to result.newlyUnlockedCollectible
         }
 
     fun recordDaily(dayKey: String) {

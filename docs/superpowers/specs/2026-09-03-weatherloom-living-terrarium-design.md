@@ -17,14 +17,15 @@ The Terrarium is therefore not a separate decorating minigame. It is the persist
 
 1. **Preserve the deterministic puzzle engine.** The same level plus the same weather threads must continue to produce the same simulation result.
 2. **Preserve the approved Weatherloom visual identity.** `docs/superpowers/UI_STYLE_GUARDRAILS.md` is authoritative.
-3. **Remain offline-first.** Core play, Terrarium, progression, discoveries, seasons that ship with the app, and saves must not require a backend or an OpenAI API connection.
-4. **Animation presents state; it does not invent state.** Rain, clouds, vegetation, water, mechanisms, and creatures may animate richly, but their logical state comes from the puzzle/Terrarium domain model.
+3. **Remain offline-first.** Core play, Terrarium, progression, discoveries, shipped seasons, and saves must not require a backend or OpenAI API connection.
+4. **Animation presents state; it does not invent state.** Rain, clouds, vegetation, water, mechanisms, and creatures may animate richly, but logical state comes from the puzzle/Terrarium domain model.
 5. **Reduced Motion is a first-class contract.** Informational state changes remain understandable while ambient motion is reduced or removed.
-6. **UI is never authoritative game-state storage.** Domain services own state; Compose renders and sends intents.
-7. **Save evolution is migration-driven.** No destructive schema changes, no serializing runtime objects, and no silent reset on unknown content IDs.
+6. **UI is never authoritative game-state storage.** Domain services own state; Compose renders immutable snapshots and sends intents.
+7. **Save evolution is migration-driven.** No destructive schema changes, no runtime-object serialization, and no silent reset on unknown content IDs.
 8. **No pay-to-progress architecture.** Store/IAP, if added later, remains outside basic simulation, inventory, layout, and progression authority.
 9. **One or two completed features maximum before `develop -> main`.** Red CI never moves forward.
-10. **Every implementing agent has an independent adversarial reviewer.** The builder is never the final approver of its own work.
+10. **Every implementation/work-product agent has an independent adversarial reviewer.** The builder is never the final approver of its own work. Reviewer agents are gate roles, not an infinitely recursive chain of reviewers.
+11. **Integration authority is independently challenged.** The Orchestrator's convergence/merge recommendation is reviewed by an Integration/Graph Adversary before promotion.
 
 ## Existing repository capabilities to reuse
 
@@ -34,7 +35,7 @@ The current app already provides:
 - 28 authored levels across 9 chapters.
 - Four weather thread types: Warm Front, Cold Front, Wind Band, Moisture Ribbon.
 - Deterministic fixed-step `SimulationEngine` with replayable `SimState` frames and causal events.
-- Terrain and feature vocabulary covering meadows, crops, villages, reservoirs, rivers, lakes, wetlands, forests, mountains, stone, roads, soil, flowers, windmills, and houses.
+- Terrain/features covering meadows, crops, villages, reservoirs, rivers, lakes, wetlands, forests, mountains, stone, roads, soil, flowers, windmills, and houses.
 - Objectives covering reservoirs, flowers, crop freezing, snow, village fog, windmills, flooding, and wetland water.
 - Seedling/Bloom/Flourish ratings.
 - Offline Daily Forecasts.
@@ -44,7 +45,7 @@ The current app already provides:
 - Almanac species collection and world-rule reference.
 - Existing rain, snow, fog, cloud, wind, water, reed, flower, and windmill animation in puzzle presentation.
 - Reduced Motion, music, and sound preferences.
-- Headless Python level validation, JVM determinism tests, lint, debug APK CI, checksum, and retained Actions artifact on the production-readiness branch.
+- Headless Python level validation, JVM determinism tests, lint, debug APK CI, checksum, and retained Actions artifacts on the production-readiness branch.
 
 The expansion must evolve these systems instead of duplicating them.
 
@@ -52,49 +53,48 @@ The expansion must evolve these systems instead of duplicating them.
 
 ```text
                             existing / protected
-                      +----------------------------+
-                      |    PuzzleSimulation        |
+                      +-----------------------------+
+                      |     PuzzleSimulation        |
                       | Level + Threads -> SimResult|
-                      +-------------+--------------+
-                                    |
-                                    v
-                          +-------------------+
-                          | PuzzleOutcome      |
-                          | rating + SimResult |
-                          +---------+---------+
-                                    |
-                                    v
-                          +-------------------+
-                          | RewardService      |
-                          +--+--------+-------+
-                             |        |
-                            XP   WeatherEcho
-                             |        |
-              +--------------v-+   +--v----------------+
-              | Progression    |   | EnvironmentState  |
-              +----------------+   +--+----------------+
+                      +--------------+--------------+
                                      |
-              +----------------------+----------------------+
-              |                                             |
-              v                                             v
-      +------------------+                          +------------------+
-      | TerrariumLayout  |------------------------->| ReactionEngine   |
-      +--------+---------+                          +----+--------+----+
-               ^                                         |        |
-               |                                         |        |
-      +--------+---------+                               v        v
-      | PlayerInventory  |                         GrowthState  Visitors
-      +--------+---------+                               |        |
-               ^                                         +---+----+
-               |                                             |
-      +--------+------------+                                v
-      | TerrariumCatalog    |                           Discoveries
-      +---------------------+                                |
-                                                            v
-                                                         Almanac
+                                     v
+                           +-------------------+
+                           | PuzzleOutcome     |
+                           +---------+---------+
+                                     |
+                                     v
+                           +-------------------+
+                           | RewardService     |
+                           +---+-----------+---+
+                               |           |
+                              XP    WeatherEchoSnapshot
+                               |           |
+                     +---------v--+   +----v---------------+
+                     |Progression |   | EnvironmentState   |
+                     +------------+   +----+---------------+
+                                           |
+                   +-----------------------+----------------------+
+                   |                                              |
+                   v                                              v
+          +------------------+                           +------------------+
+          | TerrariumLayout  |-------------------------->| ReactionEngine   |
+          +--------+---------+                           +----+--------+----+
+                   ^                                          |        |
+                   |                                          |        |
+          +--------+---------+                                v        v
+          | PlayerInventory  |                         GrowthState   Visitors
+          +--------+---------+                                |        |
+                   ^                                          +---+----+
+                   |                                              |
+          +--------+------------+                                 v
+          | TerrariumCatalog    |                            Discoveries
+          +---------------------+                                 |
+                                                                  v
+                                                               Almanac
 ```
 
-Persistence owns serializable player state beneath the mutable domain services. Presentation reads immutable snapshots and emits intents.
+Persistence owns serializable player state beneath mutable domain services. Presentation reads immutable snapshots and emits intents.
 
 ## Domain boundaries
 
@@ -118,7 +118,7 @@ unlockMetadata
 assetRefs
 ```
 
-Content should be data-driven and versioned. Stable IDs are permanent contracts once shipped.
+Content files carry their own schema/version. Stable IDs become permanent contracts once shipped.
 
 ### PlayerInventory
 Owns what the player can place.
@@ -135,7 +135,7 @@ unlockedAt
 All grants pass through one mutation authority. Duplicate grants must be idempotent or explicitly converted according to a defined rule.
 
 ### TerrariumLayout
-Owns placed instances only.
+Owns **placement only**. Biological progression does not live here.
 
 ```text
 instanceId
@@ -146,10 +146,23 @@ yNormalized
 rotation
 logicalFootprint
 depthLayer
-growthStage
 ```
 
 The initial implementation uses a 2.5D snap-assisted placement surface. Logical footprints prevent overlap while artwork may visually overflow footprints to preserve the handcrafted look.
+
+### GrowthState
+Owns persistent biological progression separately from placement, keyed by a stable placed instance or another explicitly documented growth identity.
+
+```text
+instanceId
+growthStage
+growthPulsesApplied
+lastRelevantEchoId?
+```
+
+Plants use authored stages such as Seed -> Sprout -> Young -> Mature -> Bloom. Primary progression is **Growth Pulses** earned from play and relevant weather events, not mandatory real-time watering. Time away never kills or damages content. A nonpunitive catch-up pulse may be added later but cannot become a required timer loop.
+
+Separating growth from layout prevents moving an item from accidentally resetting or duplicating biological state.
 
 ### PlayerProgression
 One primary XP track. Existing Seedling/Bloom/Flourish remains the performance system; do not create a second perfect-rating concept.
@@ -157,47 +170,51 @@ One primary XP track. Existing Seedling/Bloom/Flourish remains the performance s
 ### RewardService
 The single authority that translates a completed puzzle outcome into durable progression changes.
 
-It receives a frozen `PuzzleOutcome` and performs one transaction-like mutation covering:
+It receives a frozen `PuzzleOutcome` and executes **one serialized save mutation** covering:
 
 - level record update;
 - XP grant;
 - direct collectible/item grant;
 - mastery progress where applicable;
-- Weather Echo derivation/recording;
+- Weather Echo snapshot derivation/recording;
 - daily completion where applicable;
 - reward presentation payload.
 
 `PuzzleViewModel` may call this service but must not independently mutate inventory/XP/discovery state.
 
-### WeatherEcho
-A compact causal summary derived from the actual puzzle simulation, never random loot.
+The persistence layer must expose one transaction-like `mutate/update` boundary so a crash or replay cannot leave half of a reward applied.
 
-MVP:
+### WeatherEchoSnapshot
+A compact deterministic causal summary derived from the actual puzzle simulation, never random loot.
 
-- Rain
-- Snow
-- Wind
-- Clear
+A single enum is too lossy because a puzzle may be both rainy and windy. The durable MVP shape therefore supports simultaneous phenomena:
 
-Next:
+```text
+id
+kinds: ordered set of Rain | Snow | Wind | Clear
+rainIntensity: 0..N
+snowIntensity: 0..N
+windIntensity: 0..N
+primaryKind: derived for concise UI only
+```
 
-- Mist
-- Warm
-- Cold
+`Clear` is mutually exclusive with precipitation/fog-heavy conditions according to an explicit derivation rule. Later schema-compatible fields/tags can add Mist, Warm, Cold, Rainbow, Thunderstorm, Sunshower, Heavy Snow, or Moonlit Mist.
 
-Later authored phenomena may include Rainbow, Thunderstorm, Sunshower, Heavy Snow, and Moonlit Mist.
-
-The derivation function must be deterministic and unit-tested. The same frozen `SimResult` produces the same echo classification.
+The derivation function must be deterministic and unit-tested. The same frozen `SimResult` produces the same ordered snapshot and ID. It must not depend on wall-clock time, hash iteration order, or frame rate.
 
 ### EnvironmentState
-The Terrarium's current environmental input. It contains the active Weather Echo plus any stable season/environment modifiers. It is not a continuously simulated copy of `SimState`.
+The Terrarium's current environmental input. It contains the active `WeatherEchoSnapshot` plus stable season/environment modifiers. It is not a continuously simulated copy of `SimState`.
 
 ### ReactionEngine
 A pure, deterministic evaluator:
 
 ```text
-TerrariumLayout + EnvironmentState + Catalog + previous durable reaction state
-                              -> ReactionResult
+TerrariumLayout
++ GrowthState
++ EnvironmentState
++ Catalog
++ prior durable discovery/visitor state
+-> ReactionResult
 ```
 
 Reaction rules are data-driven. Example:
@@ -205,9 +222,9 @@ Reaction rules are data-driven. Example:
 ```text
 requires:
   tags: [rainbell]
-  weather: Rain
+  weatherKinds: [Rain]
 result:
-  visualState: BLOOM
+  visualState: BLOOM_WET
   discovery: rainbell_after_rain
 ```
 
@@ -216,18 +233,18 @@ Another:
 ```text
 requires:
   tags: [pond, reeds]
-  weather: Rain
+  weatherKinds: [Rain]
 result:
   visitor: frog
   discovery: pond_chorus
 ```
 
-Rules must not depend on unordered collection iteration, wall-clock randomness, or frame rate. If variety is desired, use deterministic seeds derived from stable state.
+`ReactionResult` separates:
 
-### GrowthState
-Plants use authored stages such as Seed -> Sprout -> Young -> Mature -> Bloom.
+- **ephemeral visual state** — safe to recompute whenever inputs change;
+- **durable events** — discoveries, first-visit records, growth pulses, or unlocks that carry stable IDs and are applied idempotently exactly once.
 
-Primary progression is **Growth Pulses** earned from play and relevant weather events, not mandatory real-time watering. Time away never kills or damages content. A nonpunitive catch-up pulse may be added later but cannot become a required timer loop.
+Rules must not depend on unordered collection iteration, wall-clock randomness, or frame rate. If visual variety is desired, use deterministic seeds derived from stable state.
 
 ### Visitors
 Animals are primarily condition-driven visitors rather than owned inventory objects.
@@ -241,7 +258,7 @@ MVP visitor families:
 
 Later examples: dragonfly, ladybug, firefly, owl, hummingbird, luna moth, salamander, fox.
 
-Visitors have lightweight authored behavior state machines for presentation. Their presence is a deterministic reaction outcome; animation is presentation.
+Visitor **presence** is a ReactionEngine result. Visitor **motion** is a lightweight authored presentation state machine. Presentation may be seeded for repeatable variety but cannot grant rewards or mutate logical conditions frame-by-frame.
 
 ### Discoveries / Almanac
 The existing Almanac expands into three conceptual sections under the same visual language:
@@ -256,21 +273,22 @@ Undiscovered entries should expose clues where useful rather than a wall of opaq
 
 ```text
 player draws threads
-        -> SimulationEngine.run()
-        -> frozen SimResult
-        -> rating calculation
-        -> PuzzleOutcome
-        -> RewardService.apply(outcome)
-             -> LevelRecord
-             -> XP
-             -> item/collectible grant
-             -> WeatherEcho
-        -> persisted save
-        -> Terrarium opens
-        -> ReactionEngine.evaluate()
-        -> growth / visitor / discovery changes
-        -> persisted durable reaction outcomes
-        -> presentation animations
+ -> SimulationEngine.run()
+ -> frozen SimResult
+ -> rating calculation
+ -> PuzzleOutcome
+ -> RewardService.apply(outcome)
+      -> ONE serialized persistence mutation
+         -> LevelRecord
+         -> XP
+         -> item/collectible grant
+         -> WeatherEchoSnapshot
+ -> persisted save
+ -> Terrarium opens / environment changes
+ -> ReactionEngine.evaluate()
+ -> ephemeral visual state + durable event IDs
+ -> idempotent durable-event application
+ -> presentation animations
 ```
 
 This keeps the original puzzle loop authoritative while making its consequences persist outside the level.
@@ -327,19 +345,19 @@ Each animation is classified as:
 - **ambient** — reduce substantially or freeze;
 - **decorative particle** — disable/minimize.
 
-Reduced Motion never changes logical simulation or rewards.
+Reduced Motion never changes logical simulation, ReactionEngine results, growth, discoveries, or rewards.
 
 ### Performance boundary
 Do not run a full per-object ecological simulation every frame. Reaction evaluation happens on meaningful events such as:
 
 - puzzle completion;
 - Weather Echo change;
-- layout edit commit;
+- committed layout edit;
 - growth pulse;
 - season/environment change;
 - app restore where durable state needs reconciliation.
 
-The resulting state is cached/persisted. Animation controllers render that state efficiently.
+The resulting logical/visual snapshot is cached. Animation controllers render that snapshot efficiently and must avoid offscreen work where practical.
 
 ## Terrarium editing UX
 
@@ -354,7 +372,7 @@ MVP operations:
 - store/remove;
 - undo;
 - redo;
-- save automatically on committed edits.
+- persist committed edits automatically.
 
 Arbitrary object scaling is not MVP. Authored size/growth variants preserve visual consistency and touch usability.
 
@@ -413,7 +431,7 @@ Do not use real-world weather APIs for core Terrarium state.
 
 A migration engine is required before adding Terrarium state to the save.
 
-Current schema-1 saves must remain readable. The new durable shape should evolve toward:
+Current schema-1 saves must remain readable. The durable shape should evolve toward:
 
 ```text
 schema
@@ -426,7 +444,8 @@ terrariumLayout
 growthState
 discoveries
 visitorHistory
-lastWeatherEcho
+lastWeatherEchoSnapshot
+appliedDurableEventIds
 ```
 
 Rules:
@@ -436,7 +455,8 @@ Rules:
 - deterministic/idempotent migrations;
 - unknown/deprecated item IDs produce graceful placeholders/ignored instances, never total save loss;
 - corruption fallback is explicit and tested;
-- reward/inventory mutations should be written atomically at the repository abstraction level;
+- all central mutations go through a serialized repository/store mutation boundary;
+- reward and durable reaction event IDs make replayed operations idempotent;
 - migration tests precede irreversible schema changes.
 
 ## Visual contract
@@ -461,20 +481,22 @@ Accessibility or framework defaults never justify a generic Material restyle.
 
 OpenAI is a **development tool only**, not a runtime Weatherloom dependency.
 
-Recommended implementation: a Python harness under `tools/ai/` using the OpenAI Agents SDK and Responses API.
+Recommended implementation: a Python harness under `tools/ai/` using the OpenAI Agents SDK/Responses API.
 
 ### Orchestration style
-Use a manager/code-orchestrated hybrid:
+Use a manager + code-orchestrated hybrid:
 
-- one Orchestrator owns the task graph and final gate;
-- specialists are exposed as bounded workers;
-- each worker output is independently evaluated by a paired adversarial reviewer;
+- one Orchestrator owns the task graph and proposes the final gate;
+- an Integration/Graph Adversary independently challenges convergence and promotion;
+- specialists perform bounded work;
+- each implementation/work-product agent is independently evaluated by a paired adversarial reviewer;
 - independent worker/reviewer pairs may run concurrently;
 - central state changes are serialized;
 - structured reviewer results are machine-readable.
 
 ### Required worker/reviewer pairs
 
+- AgentHarnessWorker <-> AgentHarnessAdversary
 - DomainModelWorker <-> DomainModelAdversary
 - PersistenceWorker <-> PersistenceAdversary
 - RewardWorker <-> RewardAdversary
@@ -485,6 +507,9 @@ Use a manager/code-orchestrated hybrid:
 - ContentWorker <-> ContentSchemaAdversary
 - TestWorker <-> MutationEdgeCaseAdversary
 - ReleaseWorker <-> SupplyChainSecretAdversary
+- Orchestrator <-> IntegrationGraphAdversary
+
+Reviewer agents are final gate roles for the work item they review; they are not recursively reviewed by another reviewer. Their effectiveness is instead validated through deterministic harness tests and seeded defect/eval cases.
 
 ### Reviewer contract
 Structured output fields:
@@ -499,20 +524,23 @@ findings[]:
   requiredFix
 ```
 
-A worker's patch cannot advance until its paired reviewer returns APPROVED. `NEEDS_CHANGES` loops back through worker -> focused tests -> independent reviewer. A design blocker is documented rather than churned indefinitely.
+A worker's patch cannot advance until its paired reviewer returns APPROVED. `NEEDS_CHANGES` loops through worker -> focused tests -> a new independent review pass. A design blocker is documented rather than churned indefinitely.
+
+### Workspace isolation
+For coding/refactor work, prefer isolated workspaces so builders do not mutate the integration checkout directly. The Agents SDK Sandbox Agent capability is suitable for this class of workflow, but it is currently beta; the harness must therefore keep the basic orchestration/reviewer contract usable without requiring sandbox-specific APIs. When sandbox mode is enabled, reviewer agents receive a fresh/read-only snapshot or diff rather than inheriting the builder's mutable workspace.
 
 ### Model policy
-Model IDs are configuration, not hard-coded product contracts. Default development policy:
+Model IDs are configuration, not product contracts. As of this plan, a reasonable default is:
 
-- highest-capability available model for architecture, migration, and adversarial review;
-- balanced model for normal worker tasks;
-- cost-efficient model for bulk content/doc linting;
+- architecture/migration/adversarial review: highest-capability model available to the account (for example `gpt-5.6-sol`; optionally newer flagship access when available);
+- normal worker tasks: balanced model such as `gpt-5.6-terra`;
+- bulk content/doc linting: efficient model such as `gpt-5.6-luna`;
 - environment overrides for all model choices.
 
-The harness must not assume access to a rolling/limited model tier.
+The harness must not require a rolling/limited model tier.
 
 ### Tracing and privacy
-Use Agents SDK tracing for development observability where appropriate. Do not include secrets, keystore material, raw API keys, or private credentials in prompts/traces. Support disabling sensitive trace content and disabling tracing entirely for tests.
+Use Agents SDK tracing for development observability where appropriate. Do not include secrets, keystore material, raw API keys, or private credentials in prompts/traces. Sensitive trace capture is disabled by default for repository workflows; deterministic tests disable tracing and live calls.
 
 ### Harness tests
 Use deterministic Agents SDK testing utilities for orchestration shape. Seed adversarial fixtures such as:
@@ -536,14 +564,17 @@ Required graph checks:
 
 1. dependency direction remains `core simulation -> outcome`, never Terrarium -> puzzle engine;
 2. UI does not become state authority;
-3. RewardService is the sole reward/inventory transaction entry point;
-4. save migrations remain one-way/idempotent;
-5. ReactionEngine remains deterministic/pure for a given input snapshot;
-6. OpenAI/runtime networking does not enter the Android app;
-7. animation does not mutate authoritative state;
-8. store/economy does not become required by basic gameplay;
-9. no circular domain dependencies;
-10. branch/CI gates remain intact.
+3. RewardService is the sole puzzle-reward transaction authority;
+4. inventory mutations pass through one domain/persistence authority;
+5. layout and biological GrowthState remain separate;
+6. save migrations remain one-way/idempotent;
+7. ReactionEngine remains deterministic/pure for a given input snapshot;
+8. durable reaction events are idempotent;
+9. OpenAI/runtime networking does not enter the Android app;
+10. animation does not mutate authoritative state;
+11. store/economy does not become required by basic gameplay;
+12. no circular domain dependencies;
+13. branch/CI gates remain intact.
 
 Run after shared-domain changes, migrations, converging parallel work, merge-conflict repair, and immediately before integration to `develop`/`main`.
 
@@ -558,7 +589,8 @@ Safe to parallelize after shared contracts are frozen:
 - test fixtures;
 - authored reaction/content data;
 - documentation;
-- OpenAI harness reviewers.
+- OpenAI harness reviewers;
+- release workflow work that does not overlap central Android state files.
 
 Serialize:
 
@@ -570,7 +602,7 @@ Serialize:
 - economy transaction authority;
 - branch merges.
 
-Every parallel worker has its own adversarial reviewer before convergence.
+Every parallel implementation/work-product agent has its own adversarial reviewer before convergence.
 
 ## Integration cadence
 
@@ -584,6 +616,7 @@ Rules:
 
 - feature branch must pass targeted tests and full applicable CI;
 - paired adversarial reviewer must APPROVE;
+- Integration/Graph Adversary reviews convergence where multiple branches meet;
 - run `/graphRepair` or the explicit Graph Integrity Pass;
 - merge feature to `develop` only when green;
 - after every one or two completed features, merge green `develop` to `main`;
@@ -597,16 +630,16 @@ Before scaling content, prove one complete causal chain:
 
 ```text
 solve representative puzzle
--> RewardService grants Rainbell + XP + Rain WeatherEcho
+-> RewardService grants Rainbell + XP + WeatherEchoSnapshot{Rain,...}
 -> inventory owns Rainbell
 -> player places Rainbell
 -> layout persists
 -> app restarts
 -> Rainbell remains in place
--> Rain WeatherEcho evaluates
--> Rainbell changes to bloom reaction state
+-> Rain echo evaluates
+-> Rainbell gets bloom/wet visual reaction state
 -> a qualifying visitor/reaction can appear
--> discovery persists
+-> discovery persists exactly once
 -> Almanac displays the discovery
 -> Reduced Motion renders equivalent logical state with less motion
 ```
@@ -618,7 +651,7 @@ Only after this chain is green should content expand toward the planned ~24 MVP 
 - one Terrarium layout;
 - ~24 placeable objects after vertical proof;
 - approximately 8 flowers/plants, 3 trees/shrubs, 3 fungi/ground items, 3 geological/environment details, 2 water features, 2 structures, 3 accents;
-- 4 Weather Echoes: Rain, Snow, Wind, Clear;
+- MVP Weather Echo kinds: Rain, Snow, Wind, Clear, with simultaneous non-Clear kinds allowed;
 - approximately 10 reaction rules;
 - 4 visitor families: butterfly, bee, frog, bird;
 - inventory and persistent placement;
@@ -635,7 +668,7 @@ Only after this chain is green should content expand toward the planned ~24 MVP 
 
 After the causal loop is proven:
 
-- Mist/Warm/Cold Echoes;
+- Mist/Warm/Cold Echo tags/fields;
 - larger content catalog;
 - more visitors;
 - paths/streams/bridges;
@@ -676,6 +709,7 @@ A feature is done only when:
 - mobile UI behavior is verified where relevant;
 - style and Reduced Motion contracts are preserved;
 - paired adversarial review is APPROVED;
+- Integration/Graph Adversary has no unresolved blocker at convergence;
 - `/graphRepair` or explicit Graph Integrity Pass is clean/understood;
 - applicable CI is green;
 - code is committed and pushed.

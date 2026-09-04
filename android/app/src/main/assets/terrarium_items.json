@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "growthProfiles": [
+    {
+      "id": "botanical-five-stage",
+      "stages": ["Seed", "Sprout", "Young", "Mature", "Bloom"],
+      "pulsesPerStage": 1
+    },
+    {
+      "id": "fungus-four-stage",
+      "stages": ["Seed", "Sprout", "Mature", "Bloom"],
+      "pulsesPerStage": 1
+    }
+  ],
+  "items": [
+    {
+      "id": "sunlace",
+      "nameKey": "terrarium.item.sunlace",
+      "category": "Botanical",
+      "visualFamily": "sun-lace",
+      "footprint": {"width": 1, "height": 1},
+      "allowedRotations": ["Deg0"],
+      "reactionTags": ["plant", "sunlace", "clear", "warm"],
+      "growthProfileId": "botanical-five-stage",
+      "biomeTags": ["meadow"],
+      "assetRef": "spec_sunlace"
+    },
+    {
+      "id": "cloudmoss",
+      "nameKey": "terrarium.item.cloudmoss",
+      "category": "Botanical",
+      "visualFamily": "cloud-moss",
+      "footprint": {"width": 1, "height": 1},
+      "allowedRotations": ["Deg0"],
+      "reactionTags": ["plant", "cloudmoss", "moisture", "fog"],
+      "growthProfileId": "botanical-five-stage",
+      "biomeTags": ["wetland"],
+      "assetRef": "spec_cloudmoss"
+    },
+    {
+      "id": "windreed",
+      "nameKey": "terrarium.item.windreed",
+      "category": "Botanical",
+      "visualFamily": "wind-reed",
+      "footprint": {"width": 1, "height": 1},
+      "allowedRotations": ["Deg0"],
+      "reactionTags": ["plant", "windreed", "wind"],
+      "growthProfileId": "botanical-five-stage",
+      "biomeTags": ["river"],
+      "assetRef": "spec_windreed"
+    },
+    {
+      "id": "mistcap",
+      "nameKey": "terrarium.item.mistcap",
+      "category": "Fungus",
+      "visualFamily": "mist-cap",
+      "footprint": {"width": 1, "height": 1},
+      "allowedRotations": ["Deg0"],
+      "reactionTags": ["fungus", "mistcap", "fog", "moisture"],
+      "growthProfileId": "fungus-four-stage",
+      "biomeTags": ["forest"],
+      "assetRef": "spec_mistcap"
+    },
+    {
+      "id": "frostfern",
+      "nameKey": "terrarium.item.frostfern",
+      "category": "Botanical",
+      "visualFamily": "frost-fern",
+      "footprint": {"width": 1, "height": 1},
+      "allowedRotations": ["Deg0"],
+      "reactionTags": ["plant", "frostfern", "snow", "cold"],
+      "growthProfileId": "botanical-five-stage",
+      "biomeTags": ["mountain"],
+      "assetRef": "spec_frostfern"
+    },
+    {
+      "id": "rainbell",
+      "nameKey": "terrarium.item.rainbell",
+      "category": "Botanical",
+      "visualFamily": "bell-flower",
+      "footprint": {"width": 1, "height": 1},
+      "allowedRotations": ["Deg0"],
+      "reactionTags": ["plant", "rainbell", "rain"],
+      "growthProfileId": "botanical-five-stage",
+      "biomeTags": ["meadow"],
+      "assetRef": "spec_rainbell"
+    },
+    {
+      "id": "thawlily",
+      "nameKey": "terrarium.item.thawlily",
+      "category": "Botanical",
+      "visualFamily": "thaw-lily",
+      "footprint": {"width": 1, "height": 1},
+      "allowedRotations": ["Deg0"],
+      "reactionTags": ["plant", "thawlily", "snow", "melt"],
+      "growthProfileId": "botanical-five-stage",
+      "biomeTags": ["mountain", "wetland"],
+      "assetRef": "spec_thawlily"
+    },
+    {
+      "id": "galeflax",
+      "nameKey": "terrarium.item.galeflax",
+      "category": "Botanical",
+      "visualFamily": "gale-flax",
+      "footprint": {"width": 1, "height": 1},
+      "allowedRotations": ["Deg0"],
+      "reactionTags": ["plant", "galeflax", "wind"],
+      "growthProfileId": "botanical-five-stage",
+      "biomeTags": ["meadow"],
+      "assetRef": "spec_galeflax"
+    },
+    {
+      "id": "loomstar",
+      "nameKey": "terrarium.item.loomstar",
+      "category": "Botanical",
+      "visualFamily": "loom-star",
+      "footprint": {"width": 1, "height": 1},
+      "allowedRotations": ["Deg0"],
+      "reactionTags": ["plant", "loomstar", "rain", "snow", "wind", "clear"],
+      "growthProfileId": "botanical-five-stage",
+      "biomeTags": ["all-biomes"],
+      "assetRef": "spec_loomstar"
+    }
+  ]
+}

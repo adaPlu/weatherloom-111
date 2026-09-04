@@ -26,13 +26,14 @@ class TerrariumSaveMigrationTest {
         val migrated = SaveMigration.decode(raw, json)
         val encoded = json.encodeToJsonElement(SaveData.serializer(), migrated).jsonObject
 
-        assertEquals(3, migrated.schema)
+        assertEquals(CURRENT_SAVE_SCHEMA, migrated.schema)
         assertEquals(listOf("rainbell", "cloudmoss", "loomstar"), migrated.collectibles)
         assertEquals("loomstar", migrated.lastCollectible)
         assertEquals(true, migrated.tutorialSeen)
+        assertEquals(PlayerProgression(), migrated.playerProgression)
 
         val inventoryElement = encoded["terrariumInventory"]
-        assertNotNull("schema-3 save must serialize terrariumInventory", inventoryElement)
+        assertNotNull("current save must serialize terrariumInventory", inventoryElement)
         val entries = inventoryElement!!.jsonObject.getValue("entries").jsonArray
         assertEquals(
             listOf("rainbell", "cloudmoss", "loomstar"),
@@ -92,7 +93,8 @@ class TerrariumSaveMigrationTest {
         val twice = SaveMigration.decode(onceEncoded, json)
         val twiceEncoded = json.encodeToJsonElement(SaveData.serializer(), twice).jsonObject
 
-        assertEquals(3, twice.schema)
+        assertEquals(CURRENT_SAVE_SCHEMA, twice.schema)
+        assertEquals(PlayerProgression(), twice.playerProgression)
         assertEquals(once, twice)
         assertEquals(
             "rainbell",

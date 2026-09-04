@@ -4,11 +4,12 @@ package com.rork.weatherloom.data
 data class PuzzleSolveResult(
     val save: SaveData,
     val newlyUnlockedCollectible: Boolean,
-    val newTerrariumItem: Boolean
+    val newTerrariumItem: Boolean,
+    val xpGranted: Int
 )
 
 /**
- * Pure solved-level reducer. Progress, legacy collectible presentation state, and
+ * Pure solved-level reducer. Progress, XP, legacy collectible presentation state, and
  * Terrarium ownership are produced as one new [SaveData] value so the repository can
  * persist them atomically through its existing [SaveStateMutator].
  */
@@ -31,11 +32,15 @@ class PuzzleSolveService(
             bestCells = if (record.bestCells == 0) cells else minOf(record.bestCells, cells)
         )
 
+        val bestRatingEnum = Rating.entries[bestRating.coerceIn(0, Rating.entries.lastIndex)]
+        val xpGrant = save.playerProgression.grantForLevelRating(levelId, bestRatingEnum)
+
         val newlyUnlockedCollectible = rewardId != null && rewardId !in save.collectibles
         val progressSave = save.copy(
             levels = save.levels + (levelId to updatedRecord),
-            collectibles = if (newlyUnlockedCollectible && rewardId != null) {
-                save.collectibles + rewardId
+            playerProgression = xpGrant.progression,
+            collectibles = if (newlyUnlockedCollectible) {
+                save.collectibles + requireNotNull(rewardId)
             } else {
                 save.collectibles
             },
@@ -51,7 +56,8 @@ class PuzzleSolveService(
         return PuzzleSolveResult(
             save = terrariumReward.save,
             newlyUnlockedCollectible = newlyUnlockedCollectible,
-            newTerrariumItem = terrariumReward.newTerrariumItem
+            newTerrariumItem = terrariumReward.newTerrariumItem,
+            xpGranted = xpGrant.xpGranted
         )
     }
 }

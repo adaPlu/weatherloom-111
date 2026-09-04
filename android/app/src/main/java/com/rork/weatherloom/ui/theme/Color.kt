@@ -26,7 +26,7 @@ object Loom {
 /** Felt colours for each terrain type, before elevation shading. */
 object TerrainPalette {
     val Meadow = Color(0xFFA8C08C)
-    val Crop = Color(0xFFCBB877)
+    val Crop = Color(0xFFC2B58D)
     val Village = Color(0xFFC9B69C)
     val Reservoir = Color(0xFF6FA3B8)
     val River = Color(0xFF7FB3C4)

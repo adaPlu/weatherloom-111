@@ -44,6 +44,11 @@ def test_needs_changes_requires_concrete_finding() -> None:
         ReviewResult(verdict="NEEDS_CHANGES")
 
 
+def test_rejected_requires_concrete_finding() -> None:
+    with pytest.raises(ValueError):
+        ReviewResult(verdict="REJECTED")
+
+
 def test_approved_cannot_hide_unresolved_finding() -> None:
     with pytest.raises(ValueError):
         ReviewResult(

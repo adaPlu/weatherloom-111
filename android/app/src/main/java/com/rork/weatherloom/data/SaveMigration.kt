@@ -9,7 +9,7 @@ const val CURRENT_SAVE_SCHEMA = 2
 
 /**
  * Explicit, deterministic save decoding. Schema-1 saves are upgraded without
- * changing player progress or settings. Unknown fields remain forward-tolerant.
+ * changing valid player progress or settings. Unknown fields remain forward-tolerant.
  * Corrupt payloads fall back to a fresh current-schema save.
  */
 object SaveMigration {
@@ -26,18 +26,32 @@ object SaveMigration {
             when {
                 declaredSchema <= 1 -> migrateV1(decoded)
                 declaredSchema == CURRENT_SAVE_SCHEMA ->
-                    decoded.copy(schema = CURRENT_SAVE_SCHEMA)
+                    canonicalizeKnown(decoded.copy(schema = CURRENT_SAVE_SCHEMA))
                 else ->
                     // Preserve the future schema marker and every field this build
-                    // understands. ignoreUnknownKeys keeps newer additive fields from
-                    // making the entire save unreadable.
+                    // understands. Do not canonicalize future-schema semantics that
+                    // may intentionally extend ranges understood by this build.
                     decoded.copy(schema = declaredSchema)
             }
         }.getOrElse { SaveData() }
     }
 
     private fun migrateV1(v1: SaveData): SaveData =
-        v1.copy(schema = CURRENT_SAVE_SCHEMA)
+        canonicalizeKnown(v1.copy(schema = CURRENT_SAVE_SCHEMA))
+
+    private fun canonicalizeKnown(save: SaveData): SaveData =
+        save.copy(
+            levels = save.levels.mapValues { (_, record) ->
+                record.copy(
+                    rating = record.rating.coerceIn(0, Rating.entries.lastIndex),
+                    attempts = record.attempts.coerceAtLeast(0),
+                    bestStrokes = record.bestStrokes.coerceAtLeast(0),
+                    bestCells = record.bestCells.coerceAtLeast(0)
+                )
+            },
+            collectibles = save.collectibles.distinct(),
+            dailyHistory = save.dailyHistory.distinct()
+        )
 }
 
 /**

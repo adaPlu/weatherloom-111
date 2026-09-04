@@ -6,7 +6,7 @@
 
 **Branch policy:** `feature/* -> develop -> main`; no more than **1–2 completed features** may accumulate on `develop` before a green integration checkpoint to `main`.
 
-**Review policy:** every builder has an independent adversarial reviewer. Builder output cannot advance until the reviewer returns `APPROVED`.
+**Review policy:** every implementation/work-product agent has an independent adversarial reviewer. Builder output cannot advance until the reviewer returns `APPROVED`; Orchestrator convergence is separately challenged by `IntegrationGraphAdversary`.
 
 **Graph policy:** use the installed `/graphRepair` skill/tool wherever exposed. In environments where it is unavailable, run the explicit Graph Integrity Pass defined in the spec and report that substitute accurately.
 
@@ -27,9 +27,9 @@ Terrarium domain contracts --> inventory/layout persistence --> minimal editor
                                                                  |
 PuzzleOutcome/RewardService --> XP -------------------------------+
                                                                  |
-SimResult --> WeatherEcho --> EnvironmentState --> ReactionEngine-+
+SimResult --> WeatherEchoSnapshot --> EnvironmentState --> ReactionEngine
                                                                  |
-                                             Growth <-------------+
+                                             GrowthState <--------+
                                                |
                                              Visitors --> Discoveries --> Almanac
                                                |
@@ -40,7 +40,7 @@ SimResult --> WeatherEcho --> EnvironmentState --> ReactionEngine-+
                                       content scale / seasons / economy later
 ```
 
-Central save/reward/inventory mutation work is serialized. Independent release, content, UI-component, animation, documentation, and test work may run concurrently after contracts are frozen.
+Central save/reward/inventory mutation work is serialized. Independent release, content, isolated UI, animation, documentation, and test work may run concurrently after contracts are frozen.
 
 ---
 
@@ -97,14 +97,17 @@ These two features can be developed in parallel because the OpenAI harness stays
 - Python OpenAI Agents SDK; development only.
 - Manager/code-orchestrated hybrid.
 - Structured Pydantic reviewer output.
-- Every worker maps to one adversarial reviewer role.
-- `NEEDS_CHANGES` loops worker -> focused checks -> reviewer.
-- Parallel independent pairs via `asyncio.gather`.
+- Every implementation/work-product worker maps to one adversarial reviewer role.
+- Orchestrator convergence is challenged by `IntegrationGraphAdversary`.
+- `NEEDS_CHANGES` loops worker -> focused checks -> new reviewer pass.
+- Independent pairs may run concurrently via `asyncio.gather` only when their file/state targets are independent.
 - Trace metadata identifies workflow/feature/reviewer, with sensitive trace content disabled by default for repo work.
 - Model names configured by environment variables, not hard-coded availability assumptions.
-- `OPENAI_API_KEY` read only from environment; never committed or forwarded to Android.
+- `OPENAI_API_KEY` read only from the developer environment; never committed or forwarded to Android.
+- Sandbox-based coding isolation may be enabled when useful, but the basic harness cannot require beta sandbox APIs.
 
 **Initial roles:**
+- AgentHarnessWorker / AgentHarnessAdversary
 - DomainModelWorker / DomainModelAdversary
 - PersistenceWorker / PersistenceAdversary
 - RewardWorker / RewardAdversary
@@ -115,6 +118,7 @@ These two features can be developed in parallel because the OpenAI harness stays
 - ContentWorker / ContentSchemaAdversary
 - TestWorker / MutationEdgeCaseAdversary
 - ReleaseWorker / SupplyChainSecretAdversary
+- Orchestrator / IntegrationGraphAdversary
 
 **Reviewer schema:**
 
@@ -134,9 +138,11 @@ class ReviewResult(BaseModel):
 **Acceptance tests:**
 - deterministic SDK test: one worker output -> reviewer APPROVED;
 - deterministic SDK test: reviewer NEEDS_CHANGES -> second worker turn -> reviewer APPROVED;
-- independent pair scheduling demonstrates parallel execution without shared mutable file targets;
+- Orchestrator cannot promote work without a reviewer result and IntegrationGraphAdversary gate;
+- independent pair scheduling demonstrates concurrency without shared mutable file targets;
 - seeded defects are rejected: duplicate reward, missing migration, runtime INTERNET dependency, nondeterministic reaction, style drift, Reduced Motion violation;
-- test suite can run with no live model call using Agents SDK testing utilities.
+- test suite runs with no live model call using Agents SDK testing utilities;
+- reviewer does not share the builder's mutable workspace in sandbox mode.
 
 **Live smoke:** once `OPENAI_API_KEY` is configured locally, run one read-only repository review through the harness. No automatic pushes from the harness in the first version.
 
@@ -147,7 +153,8 @@ class ReviewResult(BaseModel):
 - schemas accept vague/unstructured output;
 - secrets can enter traces/prompts;
 - parallel tasks can edit the same central file;
-- tests accidentally hit the live API.
+- tests accidentally hit the live API;
+- sandbox beta behavior is required for basic tests.
 
 ---
 
@@ -170,20 +177,25 @@ object SaveMigration {
 }
 ```
 
+Also introduce a serialized repository mutation boundary before multi-field rewards are added.
+
 **Acceptance tests:**
 - null save -> valid defaults;
 - exact schema-1 save -> schema-2 current save with all progress/settings retained;
 - current save is idempotent;
 - unknown JSON fields ignored;
 - corrupt JSON follows documented fallback policy;
-- migration never silently discards valid `levels`, collectibles, daily history, tutorial, accessibility, or audio settings.
+- migration never silently discards valid `levels`, collectibles, daily history, tutorial, accessibility, or audio settings;
+- serialized mutation boundary cannot interleave two state updates into a lost update.
 
 ### Adversarial reviewer for Feature 2
-`PersistenceAdversary` attacks missing fields, negative/unknown rating values, duplicate collectible IDs, corrupt JSON, future unknown fields, interrupted writes, and accidental reset-to-default paths.
+`PersistenceAdversary` attacks missing fields, negative/unknown rating values, duplicate collectible IDs, corrupt JSON, future unknown fields, interrupted writes, lost updates, and accidental reset-to-default paths.
 
 ### Checkpoint 1 integration
 - targeted tests;
 - full CI;
+- paired adversarial approvals;
+- IntegrationGraphAdversary convergence review;
 - `/graphRepair` or explicit Graph Integrity Pass;
 - integrate each green feature to `develop`;
 - because 2 features are complete, merge `develop -> main` after full green gate.
@@ -194,7 +206,7 @@ object SaveMigration {
 
 Serialize these features because they define central state contracts.
 
-## Feature 3 — Terrarium catalog, inventory, and layout contracts
+## Feature 3 — Terrarium catalog, inventory, layout, and growth contracts
 
 **Branch:** `feature/terrarium-domain-model`
 
@@ -204,6 +216,7 @@ Serialize these features because they define central state contracts.
 - Create: `TerrariumCatalog.kt`
 - Create: `PlayerInventory.kt`
 - Create: `TerrariumLayout.kt`
+- Create: `GrowthState.kt`
 - Create asset: `android/app/src/main/assets/terrarium_items.json`
 - Create tests under `android/app/src/test/java/com/rork/weatherloom/core/terrarium/`
 - Extend save DTOs only through the migration path from Feature 2.
@@ -213,12 +226,13 @@ Serialize these features because they define central state contracts.
 - category, visual family, footprint, allowed rotations, reaction tags, growth profile;
 - inventory ownership separate from placement;
 - layout instance IDs separate from item IDs;
-- normalized position + logical footprint + depth + rotation + growth stage.
+- layout contains normalized position + logical footprint + depth + rotation only;
+- `GrowthState` is separate from layout and keyed by stable instance/growth identity.
 
 **Compatibility:** existing nine botanical collectible IDs map into the new catalog without losing unlock history.
 
 ### Adversarial reviewer
-`DomainModelAdversary` attacks ID instability, runtime-object serialization, catalog/inventory coupling, invalid footprints, duplicate instance IDs, impossible rotations, and circular package dependencies.
+`DomainModelAdversary` attacks ID instability, runtime-object serialization, catalog/inventory coupling, growth/layout duplication, invalid footprints, duplicate instance IDs, impossible rotations, and circular package dependencies.
 
 ---
 
@@ -243,13 +257,13 @@ Serialize these features because they define central state contracts.
 
 **Bootstrap rule:** a schema-1 player with existing collectibles receives a deterministic initial layout matching the current fixed-slot presentation as closely as possible.
 
-**Required end-to-end proof:** own one existing Rainbell -> place -> restart/reload -> same placement.
+**Required end-to-end proof:** own one existing Rainbell -> place -> restart/reload -> same placement and same independent growth state.
 
 ### Adversarial reviewer
-`PersistenceAdversary` attacks duplicate grants, invalid/missing item references, conflicting footprints, placement outside allowed area, deleted content IDs, replaying the same mutation, and serialization/reload drift.
+`PersistenceAdversary` attacks duplicate grants, invalid/missing item references, conflicting footprints, placement outside allowed area, deleted content IDs, replaying the same mutation, growth reset on move, and serialization/reload drift.
 
 ### Checkpoint 2 integration
-Full tests -> Graph Integrity -> feature PRs -> `develop`; then `develop -> main` after these two green features.
+Full tests -> paired reviews -> IntegrationGraphAdversary -> Graph Integrity -> feature PRs -> `develop`; then `develop -> main` after these two green features.
 
 ---
 
@@ -265,7 +279,7 @@ These can be implemented partly in parallel after domain/layout contracts freeze
 - `ui/screens/TerrariumScreen.kt`
 - `ui/board/TerrariumScene.kt`
 - new `ui/terrarium/*` editor components/viewmodel
-- accessibility semantics tests later or now where practical.
+- accessibility semantics tests where practical.
 
 **Scope:** one complete accessible editor path before content expansion:
 - enter Arrange mode from the existing home hierarchy;
@@ -296,17 +310,17 @@ These can be implemented partly in parallel after domain/layout contracts freeze
 
 **Goal:** extract transaction authority from `PuzzleViewModel.finish()` before XP, Weather Echoes, inventory, or discovery are added.
 
-**Required proof:** every existing solve path still produces the same Seedling/Bloom/Flourish and collectible result as before extraction.
+**Required proof:** every existing solve path still produces the same Seedling/Bloom/Flourish and collectible result as before extraction; one outcome is applied atomically/idempotently.
 
 ### Adversarial reviewer
-`RewardAdversary` attacks double completion, repeated `finish()`, interrupted claim, Daily vs authored levels, replaying result screen, same reward granted twice, and rating downgrade.
+`RewardAdversary` attacks double completion, repeated `finish()`, interrupted claim, Daily vs authored levels, replaying result screen, same reward granted twice, partial transaction writes, and rating downgrade.
 
 ### Checkpoint 3
-Full green gate + graph integrity + merge after 2 features.
+Full green gate + paired reviews + graph integrity + merge after 2 features.
 
 ---
 
-# CHECKPOINT 4 — PROGRESSION + WEATHER ECHO
+# CHECKPOINT 4 — PROGRESSION + WEATHER ECHO SNAPSHOT
 
 These can be developed in parallel once RewardService contract is stable.
 
@@ -322,18 +336,18 @@ These can be developed in parallel once RewardService contract is stable.
 
 **Adversary:** `RewardAdversary` attacks XP duplication/exploit paths and normal progression blocked by Flourish.
 
-## Feature 8 — WeatherEcho derivation from SimResult
+## Feature 8 — WeatherEchoSnapshot derivation from SimResult
 
-**Files:** new pure `WeatherEcho.kt` / `WeatherEchoDeriver.kt` and tests.
+**Files:** new pure `WeatherEchoSnapshot.kt` / `WeatherEchoDeriver.kt` and tests.
 
-MVP classifications: Rain, Snow, Wind, Clear. Define precedence and tie behavior explicitly.
+MVP supports simultaneous non-Clear kinds: Rain, Snow, Wind. `Clear` is derived only when the explicit clear-condition contract is met. Persist deterministic intensities and derive a primary display kind separately.
 
-**Tests:** representative handcrafted `SimResult`/frames, deterministic repeated derivation, no wall-clock/random dependency.
+**Tests:** representative handcrafted `SimResult`/frames, rain+wind mixed cases, deterministic repeated derivation, stable ordering/ID, no wall-clock/random dependency.
 
-**Adversary:** `WeatherEchoAdversary` attacks ambiguous mixed weather, empty/no-event runs, multiple simultaneous conditions, and iteration-order drift.
+**Adversary:** `WeatherEchoAdversary` attacks ambiguous mixed weather, empty/no-event runs, Clear conflicting with precipitation, multiple simultaneous conditions, and iteration-order drift.
 
 ### Checkpoint 4
-Full gate -> Graph Integrity -> develop -> main.
+Full gate -> paired reviews -> IntegrationGraphAdversary -> Graph Integrity -> develop -> main.
 
 ---
 
@@ -348,15 +362,17 @@ Serialize shared reaction contracts first, then UI/presentation may parallelize.
 - `terrarium_reactions.json`
 - deterministic evaluator tests.
 
-First reaction: Rain + Rainbell -> Rainbell bloom reaction state / discovery candidate.
+First reaction: Rain + Rainbell -> Rainbell bloom/wet ephemeral reaction state plus stable discovery candidate/event ID.
+
+`ReactionResult` must separate recomputable visual state from idempotent durable event IDs.
 
 **Adversary:** `ReactionAdversary` attacks nondeterminism, rule-order dependence, missing items, contradictory outputs, repeated evaluation granting duplicate durable events, and content-schema drift.
 
 ## Feature 10 — Puzzle -> Rain Echo -> Rainbell reaction vertical proof
 
-Connect RewardService WeatherEcho output to persistent Terrarium environment and evaluate on Terrarium open/meaningful state change.
+Connect RewardService `WeatherEchoSnapshot` output to persistent Terrarium environment and evaluate on Terrarium open/meaningful state change.
 
-**Required proof:** solve representative puzzle -> receive Rain Echo -> restart app if desired -> Terrarium Rainbell reacts consistently.
+**Required proof:** solve representative puzzle -> receive Rain kind -> restart app if desired -> Terrarium Rainbell reacts consistently -> durable discovery event can apply exactly once.
 
 **Adversary:** paired integration adversary tries to cause stale echo, double application, missing save, wrong puzzle outcome, and restart divergence.
 
@@ -371,9 +387,9 @@ Full gate -> graph integrity -> main.
 
 Stages: Seed -> Sprout -> Young -> Mature -> Bloom (content may omit stages when not applicable).
 
-Growth comes primarily from play/weather events, not mandatory elapsed-time care.
+Growth comes primarily from play/weather events, not mandatory elapsed-time care. Moving an item must not reset biological state.
 
-**Adversary:** attacks clock manipulation, regressions, repeated pulses, max-stage overflow, species without growth profiles.
+**Adversary:** attacks clock manipulation, regressions, repeated pulses, max-stage overflow, species without growth profiles, and move/store/re-place state loss.
 
 ## Feature 12 — First visitor + discovery registry
 
@@ -381,7 +397,7 @@ First complete combination: Rain + pond/reeds (or another authored MVP combinati
 
 Persist discovery exactly once while allowing visitor presentation to recur according to deterministic conditions.
 
-**Adversary:** attacks duplicate discoveries, visitor without prerequisites, disappearing Almanac state, invalid content IDs.
+**Adversary:** attacks duplicate discoveries, visitor without prerequisites, disappearing Almanac state, invalid content IDs, and animation granting logical rewards.
 
 ### Checkpoint 6
 Green -> Graph Integrity -> main.
@@ -390,17 +406,17 @@ Green -> Graph Integrity -> main.
 
 # CHECKPOINT 7 — ALMANAC + LIVING ANIMATION
 
-Can be parallel after discovery/visual-state contracts freeze.
+Can run in parallel after discovery/visual-state contracts freeze.
 
 ## Feature 13 — Almanac Species / Weather / Discoveries expansion
 
 Extend existing Almanac without changing its visual language.
 
-**Adversary:** attacks lost existing species/rules, inaccessible sections, opaque completion anxiety, hard-coded runtime enums leaking into localized copy.
+**Adversary:** attacks lost existing species/rules, inaccessible sections, opaque completion anxiety, and hard-coded runtime enums leaking into localized copy.
 
 ## Feature 14 — Terrarium state-driven animation layer
 
-Preserve existing puzzle animation; add Terrarium weather/vegetation/water/mechanism/visitor animation driven by durable visual state.
+Preserve existing puzzle animation; add Terrarium weather/vegetation/water/mechanism/visitor animation driven only by logical/visual snapshots.
 
 MVP:
 - Rain animation in cloche;
@@ -424,7 +440,7 @@ Green -> performance smoke -> Graph Integrity -> main.
 
 Only after the single vertical chain is proven. Add data, not bespoke code, toward:
 - ~24 placeables;
-- 4 Weather Echoes;
+- MVP echo kinds Rain/Snow/Wind/Clear with mixed non-Clear snapshots;
 - ~10 reactions;
 - 4 visitor families.
 
@@ -470,7 +486,7 @@ If release work touches `build.gradle.kts`, CI workflows, navigation, or shared 
 
 After the causal MVP is proven:
 
-- Mist/Warm/Cold Weather Echoes;
+- Mist/Warm/Cold Weather Echo fields/tags;
 - additional visitors and rare phenomena;
 - paths, streams, bridges, structures;
 - Masterwork/Heirloom sets;
@@ -501,8 +517,9 @@ For every relevant checkpoint, test:
 - invalid/deprecated item references;
 - multiple placements/collision;
 - undo/redo;
-- growth bounds;
-- discovery preconditions;
+- growth bounds and move-without-reset;
+- discovery preconditions/idempotence;
+- mixed Weather Echo cases;
 - Reduced Motion;
 - small portrait layout;
 - expanded layout when affected;
@@ -524,7 +541,7 @@ builder
  -> focused tests
  -> paired adversarial reviewer
     -> APPROVED: continue
-    -> NEEDS_CHANGES: repair -> focused tests -> independent review again
+    -> NEEDS_CHANGES: repair -> focused tests -> new independent review pass
     -> REJECTED: stop and escalate design blocker
  -> /graphRepair or explicit Graph Integrity Pass
  -> integration tests
@@ -533,16 +550,16 @@ builder
  -> feature PR
 ```
 
-Before `develop -> main`:
+Before branch convergence or `develop -> main`:
 
 ```text
 full CI
 -> save/migration tests where affected
 -> deterministic validator
--> adversarial integration review
+-> IntegrationGraphAdversary
 -> /graphRepair or explicit Graph Integrity Pass
 -> merge
--> run main CI again
+-> run destination-branch CI again
 ```
 
 Do not claim `/graphRepair` ran unless the literal skill/tool was available; otherwise report `Graph Integrity Pass` explicitly.

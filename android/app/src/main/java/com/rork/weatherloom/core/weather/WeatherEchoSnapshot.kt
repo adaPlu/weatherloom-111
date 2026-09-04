@@ -44,11 +44,28 @@ data class WeatherEchoSnapshot(
             require(rainIntensity == 0 && snowIntensity == 0 && windIntensity == 0) {
                 "Clear cannot carry weather intensity"
             }
-        }
+            require(primaryKind == WeatherEchoKind.Clear) { "Clear must be the primary kind" }
+        } else {
+            val expectedKinds = buildList {
+                if (rainIntensity > 0) add(WeatherEchoKind.Rain)
+                if (snowIntensity > 0) add(WeatherEchoKind.Snow)
+                if (windIntensity > 0) add(WeatherEchoKind.Wind)
+            }
+            require(kinds == expectedKinds) {
+                "Weather Echo kind membership must match positive intensities"
+            }
 
-        require(
-            (kinds.isEmpty() && primaryKind == null) ||
-                (kinds.isNotEmpty() && primaryKind != null && primaryKind in kinds)
-        ) { "primaryKind must describe one of the snapshot kinds" }
+            val expectedPrimary = listOf(
+                WeatherEchoKind.Rain to rainIntensity,
+                WeatherEchoKind.Snow to snowIntensity,
+                WeatherEchoKind.Wind to windIntensity
+            ).filter { (_, intensity) -> intensity > 0 }
+                .maxByOrNull { (_, intensity) -> intensity }
+                ?.first
+
+            require(primaryKind == expectedPrimary) {
+                "primaryKind must be the canonical highest-intensity weather kind"
+            }
+        }
     }
 }

@@ -115,6 +115,43 @@ class WeatherEchoDeriverTest {
     }
 
     @Test
+    fun allThreePhenomenaRemainCanonicalAndMalformedIntensitiesAreBounded() {
+        val start = frame(size = 1, beat = 0)
+        val rainAndWind = frame(size = 1, beat = 1).apply {
+            precip[0] = 99
+            windStr[0] = 99
+        }
+        val snow = frame(size = 1, beat = 2).apply {
+            precip[0] = 99
+            precipSnow[0] = 1
+        }
+
+        val snapshot = WeatherEchoDeriver.derive(result(listOf(start, rainAndWind, snow)))
+
+        assertEquals(
+            listOf(WeatherEchoKind.Rain, WeatherEchoKind.Snow, WeatherEchoKind.Wind),
+            snapshot.kinds
+        )
+        assertEquals(WEATHER_ECHO_MAX_INTENSITY, snapshot.rainIntensity)
+        assertEquals(WEATHER_ECHO_MAX_INTENSITY, snapshot.snowIntensity)
+        assertEquals(WEATHER_ECHO_MAX_INTENSITY, snapshot.windIntensity)
+        assertEquals(WeatherEchoKind.Rain, snapshot.primaryKind)
+    }
+
+    @Test
+    fun changingFrameOrderChangesStableId() {
+        val start = frame(size = 1, beat = 0)
+        val warm = frame(size = 1, beat = 1).apply { temp[0] = 1 }
+        val moist = frame(size = 1, beat = 2).apply { moisture[0] = 1 }
+
+        val first = WeatherEchoDeriver.derive(result(listOf(start, warm, moist)))
+        val reordered = WeatherEchoDeriver.derive(result(listOf(start, moist, warm)))
+
+        assertEquals(first.kinds, reordered.kinds)
+        assertNotEquals(first.id, reordered.id)
+    }
+
+    @Test
     fun emptyFrameSequenceIsRejected() {
         val invalid = SimResult(
             frames = emptyList(),
@@ -124,13 +161,28 @@ class WeatherEchoDeriverTest {
             endHash = 0L
         )
 
+        assertIllegalArgument { WeatherEchoDeriver.derive(invalid) }
+    }
+
+    @Test
+    fun inconsistentFrameSizesAreRejected() {
+        val invalid = result(
+            listOf(
+                frame(size = 1, beat = 0),
+                frame(size = 2, beat = 1)
+            )
+        )
+
+        assertIllegalArgument { WeatherEchoDeriver.derive(invalid) }
+    }
+
+    private fun assertIllegalArgument(block: () -> Unit) {
         var threw = false
         try {
-            WeatherEchoDeriver.derive(invalid)
+            block()
         } catch (_: IllegalArgumentException) {
             threw = true
         }
-
         assertTrue(threw)
     }
 

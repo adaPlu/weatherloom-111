@@ -59,6 +59,53 @@ class SaveMigrationTest {
     }
 
     @Test
+    fun malformedLegacyRatingsAndCountersAreCanonicalized() {
+        val raw = """
+            {
+              "schema": 1,
+              "levels": {
+                "negative": {
+                  "rating": -4,
+                  "attempts": -9,
+                  "bestStrokes": -2,
+                  "bestCells": -5
+                },
+                "too-high": {
+                  "rating": 99,
+                  "attempts": 3,
+                  "bestStrokes": 2,
+                  "bestCells": 8
+                }
+              }
+            }
+        """.trimIndent()
+
+        val migrated = SaveMigration.decode(raw, json)
+
+        assertEquals(0, migrated.levels.getValue("negative").rating)
+        assertEquals(0, migrated.levels.getValue("negative").attempts)
+        assertEquals(0, migrated.levels.getValue("negative").bestStrokes)
+        assertEquals(0, migrated.levels.getValue("negative").bestCells)
+        assertEquals(3, migrated.levels.getValue("too-high").rating)
+    }
+
+    @Test
+    fun duplicateLegacyIdsAreDeduplicatedWithoutReordering() {
+        val raw = """
+            {
+              "schema": 1,
+              "collectibles": ["rainbell", "cloudmoss", "rainbell", "frostfern", "cloudmoss"],
+              "dailyHistory": ["2026-09-01", "2026-09-01", "2026-09-02"]
+            }
+        """.trimIndent()
+
+        val migrated = SaveMigration.decode(raw, json)
+
+        assertEquals(listOf("rainbell", "cloudmoss", "frostfern"), migrated.collectibles)
+        assertEquals(listOf("2026-09-01", "2026-09-02"), migrated.dailyHistory)
+    }
+
+    @Test
     fun currentSchemaDecodeIsIdempotent() {
         val expected = SaveData(
             levels = mapOf("ridge" to LevelRecord(rating = 2, attempts = 4, bestStrokes = 2, bestCells = 9)),

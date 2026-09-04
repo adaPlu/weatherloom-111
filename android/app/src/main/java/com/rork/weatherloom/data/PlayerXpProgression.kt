@@ -1,5 +1,7 @@
 package com.rork.weatherloom.data
 
+import kotlinx.serialization.Serializable
+
 /**
  * Deterministic authored-level XP values.
  *
@@ -21,3 +23,39 @@ object PlayerXpRules {
 
     fun milestoneFor(xp: Int): Int = xp.coerceAtLeast(0) / MILESTONE_STEP_XP
 }
+
+@Serializable
+data class PlayerProgression(
+    val xp: Int = 0,
+    val awardedLevelXp: Map<String, Int> = emptyMap()
+) {
+    val milestone: Int get() = PlayerXpRules.milestoneFor(xp)
+
+    /**
+     * Grants only the additional cumulative XP represented by a better rating.
+     * Replays and lower-rating completions are therefore idempotent and non-farmable.
+     */
+    fun grantForLevelRating(levelId: String, rating: Rating): XpGrantResult {
+        require(levelId.isNotBlank()) { "levelId must not be blank" }
+
+        val targetXp = PlayerXpRules.cumulativeXpFor(rating)
+        val alreadyAwarded = awardedLevelXp[levelId]?.coerceAtLeast(0) ?: 0
+        val xpGranted = (targetXp - alreadyAwarded).coerceAtLeast(0)
+        if (xpGranted == 0) {
+            return XpGrantResult(progression = this, xpGranted = 0)
+        }
+
+        return XpGrantResult(
+            progression = copy(
+                xp = xp.coerceAtLeast(0) + xpGranted,
+                awardedLevelXp = awardedLevelXp + (levelId to targetXp)
+            ),
+            xpGranted = xpGranted
+        )
+    }
+}
+
+data class XpGrantResult(
+    val progression: PlayerProgression,
+    val xpGranted: Int
+)

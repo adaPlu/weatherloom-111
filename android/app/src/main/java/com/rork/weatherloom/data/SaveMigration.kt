@@ -7,7 +7,7 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-const val CURRENT_SAVE_SCHEMA = 3
+const val CURRENT_SAVE_SCHEMA = 4
 
 /**
  * Explicit, deterministic save decoding. Legacy saves are upgraded without changing
@@ -26,7 +26,8 @@ object SaveMigration {
             val decoded = json.decodeFromJsonElement(SaveData.serializer(), element)
 
             when {
-                declaredSchema <= 2 -> migrateLegacy(decoded)
+                declaredSchema <= 2 -> migratePreTerrarium(decoded)
+                declaredSchema == 3 -> migratePlayerProgression(decoded)
                 declaredSchema == CURRENT_SAVE_SCHEMA ->
                     canonicalizeKnown(decoded.copy(schema = CURRENT_SAVE_SCHEMA))
                 else ->
@@ -38,7 +39,7 @@ object SaveMigration {
         }.getOrElse { SaveData() }
     }
 
-    private fun migrateLegacy(legacy: SaveData): SaveData {
+    private fun migratePreTerrarium(legacy: SaveData): SaveData {
         val canonical = canonicalizeKnown(legacy.copy(schema = CURRENT_SAVE_SCHEMA))
         val existingKeys = canonical.terrariumInventory.entries.map { it.stableKey }.toSet()
         val migratedEntries = canonical.collectibles
@@ -46,26 +47,59 @@ object SaveMigration {
             .map { id -> InventoryEntry(itemId = id, unlockSource = "legacy_collectible") }
             .filterNot { it.stableKey in existingKeys }
 
-        return canonical.copy(
-            terrariumInventory = PlayerInventory(
-                canonical.terrariumInventory.entries + migratedEntries
+        return backfillPlayerProgression(
+            canonical.copy(
+                terrariumInventory = PlayerInventory(
+                    canonical.terrariumInventory.entries + migratedEntries
+                )
             )
         )
     }
 
-    private fun canonicalizeKnown(save: SaveData): SaveData =
-        save.copy(
-            levels = save.levels.mapValues { (_, record) ->
-                record.copy(
-                    rating = record.rating.coerceIn(0, Rating.entries.lastIndex),
-                    attempts = record.attempts.coerceAtLeast(0),
-                    bestStrokes = record.bestStrokes.coerceAtLeast(0),
-                    bestCells = record.bestCells.coerceAtLeast(0)
-                )
-            },
-            collectibles = save.collectibles.distinct(),
-            dailyHistory = save.dailyHistory.distinct()
+    private fun migratePlayerProgression(schemaThree: SaveData): SaveData =
+        backfillPlayerProgression(
+            canonicalizeKnown(schemaThree.copy(schema = CURRENT_SAVE_SCHEMA))
         )
+
+    private fun backfillPlayerProgression(save: SaveData): SaveData {
+        val awarded = save.levels.mapNotNull { (levelId, record) ->
+            val xp = PlayerXpRules.cumulativeXpFor(record.ratingEnum)
+            if (levelId.isNotBlank() && xp > 0) levelId to xp else null
+        }.toMap()
+
+        return save.copy(
+            playerProgression = PlayerProgression(
+                xp = awarded.values.sum(),
+                awardedLevelXp = awarded
+            )
+        )
+    }
+
+    private fun canonicalizeKnown(save: SaveData): SaveData {
+        val levels = save.levels.mapValues { (_, record) ->
+            record.copy(
+                rating = record.rating.coerceIn(0, Rating.entries.lastIndex),
+                attempts = record.attempts.coerceAtLeast(0),
+                bestStrokes = record.bestStrokes.coerceAtLeast(0),
+                bestCells = record.bestCells.coerceAtLeast(0)
+            )
+        }
+        val awardedLevelXp = save.playerProgression.awardedLevelXp
+            .filterKeys { it.isNotBlank() }
+            .mapValues { (_, xp) -> xp.coerceIn(0, PlayerXpRules.FLOURISH_XP) }
+            .filterValues { it > 0 }
+        val minimumXpFromLedger = awardedLevelXp.values.sum()
+
+        return save.copy(
+            levels = levels,
+            collectibles = save.collectibles.distinct(),
+            dailyHistory = save.dailyHistory.distinct(),
+            playerProgression = PlayerProgression(
+                xp = maxOf(save.playerProgression.xp.coerceAtLeast(0), minimumXpFromLedger),
+                awardedLevelXp = awardedLevelXp
+            )
+        )
+    }
 }
 
 /**

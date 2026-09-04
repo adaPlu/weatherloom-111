@@ -59,6 +59,30 @@ class SaveMigrationTest {
     }
 
     @Test
+    fun schemaThreeBackfillsPlayerXpFromExistingBestRatings() {
+        val raw = """
+            {
+              "schema": 3,
+              "levels": {
+                "seedling": {"rating": 1},
+                "bloom": {"rating": 2},
+                "flourish": {"rating": 3},
+                "unsolved": {"rating": 0}
+              }
+            }
+        """.trimIndent()
+
+        val migrated = SaveMigration.decode(raw, json)
+
+        assertEquals(4, migrated.schema)
+        assertEquals(450, migrated.playerProgression.xp)
+        assertEquals(100, migrated.playerProgression.awardedLevelXp.getValue("seedling"))
+        assertEquals(150, migrated.playerProgression.awardedLevelXp.getValue("bloom"))
+        assertEquals(200, migrated.playerProgression.awardedLevelXp.getValue("flourish"))
+        assertFalse(migrated.playerProgression.awardedLevelXp.containsKey("unsolved"))
+    }
+
+    @Test
     fun malformedLegacyRatingsAndCountersAreCanonicalized() {
         val raw = """
             {

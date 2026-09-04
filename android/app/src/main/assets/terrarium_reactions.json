@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "rules": [
+    {
+      "id": "rainbell-after-rain",
+      "requires": {
+        "itemTags": ["rainbell"],
+        "weatherKinds": ["Rain"]
+      },
+      "result": {
+        "visualTags": ["bloom", "wet"],
+        "durableEvents": [
+          {
+            "id": "discovery.rainbell_after_rain",
+            "kind": "DiscoveryCandidate",
+            "payloadId": "rainbell_after_rain"
+          }
+        ]
+      }
+    }
+  ]
+}

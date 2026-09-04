@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 Severity = Literal["low", "medium", "high", "critical"]
 Verdict = Literal["APPROVED", "NEEDS_CHANGES", "REJECTED"]
@@ -20,15 +20,13 @@ class ReviewResult(BaseModel):
     verdict: Verdict
     findings: list[Finding] = Field(default_factory=list)
 
-    @field_validator("findings")
-    @classmethod
-    def findings_match_verdict(cls, findings: list[Finding], info):
-        verdict = info.data.get("verdict")
-        if verdict == "APPROVED" and findings:
+    @model_validator(mode="after")
+    def findings_match_verdict(self) -> "ReviewResult":
+        if self.verdict == "APPROVED" and self.findings:
             raise ValueError("APPROVED reviews cannot contain unresolved findings")
-        if verdict in {"NEEDS_CHANGES", "REJECTED"} and not findings:
-            raise ValueError(f"{verdict} reviews must explain at least one finding")
-        return findings
+        if self.verdict in {"NEEDS_CHANGES", "REJECTED"} and not self.findings:
+            raise ValueError(f"{self.verdict} reviews must explain at least one finding")
+        return self
 
 
 class WorkItem(BaseModel):

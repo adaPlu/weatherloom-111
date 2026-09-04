@@ -38,6 +38,7 @@ data class SaveData(
     val highContrast: Boolean = false,
     val musicEnabled: Boolean = true,
     val soundEnabled: Boolean = true,
+    val playerProgression: PlayerProgression = PlayerProgression(),
     val terrariumInventory: PlayerInventory = PlayerInventory(),
     val terrariumLayout: TerrariumLayout = TerrariumLayout(),
     val terrariumGrowth: List<GrowthState> = emptyList()

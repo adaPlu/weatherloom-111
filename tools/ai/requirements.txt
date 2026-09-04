@@ -1,0 +1,4 @@
+openai-agents==0.22.0
+pydantic>=2.11,<3
+pytest>=8.3,<9
+pytest-asyncio>=0.26,<1

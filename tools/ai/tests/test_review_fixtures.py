@@ -24,6 +24,28 @@ def test_openai_key_reference_in_android_is_rejected() -> None:
     assert any("developer-only" in f.invariant for f in findings)
 
 
+def test_duplicate_reward_mutation_is_rejected() -> None:
+    findings = inspect_changes(
+        {
+            "android/app/src/main/java/com/rork/weatherloom/core/reward/RewardService.kt": (
+                "val next = save.copy(collectibles = save.collectibles + reward)"
+            )
+        }
+    )
+    assert any("duplicate reward" in f.invariant.lower() for f in findings)
+
+
+def test_new_save_state_without_migration_is_rejected() -> None:
+    findings = inspect_changes(
+        {
+            "android/app/src/main/java/com/rork/weatherloom/data/GameRepository.kt": (
+                "data class SaveData(val terrariumInventory: List<String> = emptyList())"
+            )
+        }
+    )
+    assert any("migration" in f.invariant.lower() for f in findings)
+
+
 def test_nondeterministic_reaction_rule_is_rejected() -> None:
     findings = inspect_changes(
         {
@@ -33,6 +55,40 @@ def test_nondeterministic_reaction_rule_is_rejected() -> None:
         }
     )
     assert any("deterministic" in f.invariant for f in findings)
+
+
+def test_weatherloom_style_drift_is_rejected() -> None:
+    findings = inspect_changes(
+        {
+            "android/app/src/main/java/com/rork/weatherloom/ui/screens/TerrariumScreen.kt": (
+                "val accent = Color.Magenta"
+            )
+        }
+    )
+    assert any("visual language" in f.invariant.lower() for f in findings)
+
+
+def test_unconditional_infinite_animation_is_rejected_for_reduced_motion() -> None:
+    findings = inspect_changes(
+        {
+            "android/app/src/main/java/com/rork/weatherloom/ui/terrarium/AmbientClouds.kt": (
+                "val transition = rememberInfiniteTransition(); "
+                "val alpha = transition.animateFloat(animationSpec = infiniteRepeatable(tween(1000)))"
+            )
+        }
+    )
+    assert any("reduced motion" in f.invariant.lower() for f in findings)
+
+
+def test_reduced_motion_guard_allows_ambient_animation() -> None:
+    assert_clean(
+        {
+            "android/app/src/main/java/com/rork/weatherloom/ui/terrarium/AmbientClouds.kt": (
+                "if (!reducedMotion) { val transition = rememberInfiniteTransition(); "
+                "transition.animateFloat(animationSpec = infiniteRepeatable(tween(1000))) }"
+            )
+        }
+    )
 
 
 def test_clean_developer_tool_change_passes() -> None:

@@ -2,7 +2,7 @@ name: Weatherloom Android CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, "feature/**"]
   pull_request:
     branches: [main, develop]
   workflow_dispatch:
@@ -31,7 +31,7 @@ jobs:
         run: python tools/validate_levels.py
 
   android:
-    name: Unit tests, lint, and debug build
+    name: Unit tests, lint, debug build, and artifact
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -51,3 +51,16 @@ jobs:
 
       - name: Verify Android project
         run: ./gradlew testDebugUnitTest lintDebug assembleDebug --stacktrace
+
+      - name: Generate APK checksum
+        run: sha256sum app/build/outputs/apk/debug/app-debug.apk > app/build/outputs/apk/debug/app-debug.apk.sha256
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: weatherloom-debug-${{ github.sha }}
+          path: |
+            ${{ github.workspace }}/android/app/build/outputs/apk/debug/app-debug.apk
+            ${{ github.workspace }}/android/app/build/outputs/apk/debug/app-debug.apk.sha256
+          if-no-files-found: error
+          retention-days: 14

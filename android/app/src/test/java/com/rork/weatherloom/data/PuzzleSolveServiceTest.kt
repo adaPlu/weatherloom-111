@@ -8,6 +8,9 @@ import com.rork.weatherloom.core.terrarium.TerrariumRotation
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
+import kotlin.concurrent.thread
 
 class PuzzleSolveServiceTest {
 
@@ -107,5 +110,42 @@ class PuzzleSolveServiceTest {
         assertEquals(200, flourish.save.playerProgression.xp)
         assertEquals(50, flourish.xpGranted)
         assertEquals(Rating.Flourish, flourish.save.levels.getValue("c1-1").ratingEnum)
+    }
+
+    @Test
+    fun simultaneousReplaysThroughSerializedPersistenceCannotDoubleAwardXp() {
+        val service = PuzzleSolveService(PuzzleRewardBridge(catalog))
+        val workers = 8
+        val start = CountDownLatch(1)
+        val finished = CountDownLatch(workers)
+        val mutator = SaveStateMutator(SaveData()) { }
+
+        repeat(workers) {
+            thread(start = true) {
+                start.await()
+                mutator.mutateWithResult { current ->
+                    val result = service.recordSolve(
+                        save = current,
+                        levelId = "c1-1",
+                        rating = Rating.Seedling,
+                        strokes = 4,
+                        cells = 18,
+                        rewardId = "sunlace"
+                    )
+                    result.save to result.xpGranted
+                }
+                finished.countDown()
+            }
+        }
+
+        start.countDown()
+        assertTrue("workers did not finish", finished.await(5, TimeUnit.SECONDS))
+
+        val finalSave = mutator.snapshot()
+        assertEquals(100, finalSave.playerProgression.xp)
+        assertEquals(100, finalSave.playerProgression.awardedLevelXp.getValue("c1-1"))
+        assertEquals(Rating.Seedling, finalSave.levels.getValue("c1-1").ratingEnum)
+        assertEquals(listOf("sunlace"), finalSave.collectibles)
+        assertTrue(finalSave.terrariumInventory.owns("sunlace"))
     }
 }

@@ -24,7 +24,7 @@ data class LevelRecord(
 
 @Serializable
 data class SaveData(
-    val schema: Int = 1,
+    val schema: Int = CURRENT_SAVE_SCHEMA,
     val levels: Map<String, LevelRecord> = emptyMap(),
     val collectibles: List<String> = emptyList(),
     val dailyHistory: List<String> = emptyList(),
@@ -49,11 +49,13 @@ class GameRepository private constructor(context: Context) {
     private val _save = MutableStateFlow(read())
     val save: StateFlow<SaveData> = _save.asStateFlow()
 
-    private fun read(): SaveData = runCatching {
-        prefs.getString(KEY, null)?.let { json.decodeFromString(SaveData.serializer(), it) }
-    }.getOrNull() ?: SaveData()
+    /** Every mutation goes through this gate before later reward/inventory fields are added. */
+    private val mutator = SaveStateMutator(_save.value, ::persist)
 
-    private fun write(data: SaveData) {
+    private fun read(): SaveData =
+        SaveMigration.decode(prefs.getString(KEY, null), json)
+
+    private fun persist(data: SaveData) {
         _save.value = data
         runCatching {
             prefs.edit().putString(KEY, json.encodeToString(SaveData.serializer(), data)).apply()
@@ -61,52 +63,62 @@ class GameRepository private constructor(context: Context) {
     }
 
     fun recordAttempt(levelId: String) {
-        val current = _save.value
-        val rec = current.levels[levelId] ?: LevelRecord()
-        write(current.copy(levels = current.levels + (levelId to rec.copy(attempts = rec.attempts + 1))))
+        mutator.mutate { current ->
+            val rec = current.levels[levelId] ?: LevelRecord()
+            current.copy(
+                levels = current.levels +
+                    (levelId to rec.copy(attempts = rec.attempts + 1))
+            )
+        }
     }
 
     /** Stores a win, upgrades the rating if it improved, and grants the level's collectible. */
-    fun recordSolve(levelId: String, rating: Rating, strokes: Int, cells: Int, reward: String?): Boolean {
-        val current = _save.value
-        val rec = current.levels[levelId] ?: LevelRecord()
-        val best = maxOf(rec.rating, rating.ordinal)
-        val newRec = rec.copy(
-            rating = best,
-            bestStrokes = if (rec.bestStrokes == 0) strokes else minOf(rec.bestStrokes, strokes),
-            bestCells = if (rec.bestCells == 0) cells else minOf(rec.bestCells, cells)
-        )
-        val newlyUnlocked = reward != null && reward !in current.collectibles
-        write(
-            current.copy(
+    fun recordSolve(levelId: String, rating: Rating, strokes: Int, cells: Int, reward: String?): Boolean =
+        mutator.mutateWithResult { current ->
+            val rec = current.levels[levelId] ?: LevelRecord()
+            val best = maxOf(rec.rating, rating.ordinal)
+            val newRec = rec.copy(
+                rating = best,
+                bestStrokes = if (rec.bestStrokes == 0) strokes else minOf(rec.bestStrokes, strokes),
+                bestCells = if (rec.bestCells == 0) cells else minOf(rec.bestCells, cells)
+            )
+            val newlyUnlocked = reward != null && reward !in current.collectibles
+            val next = current.copy(
                 levels = current.levels + (levelId to newRec),
                 collectibles = if (newlyUnlocked) current.collectibles + reward!! else current.collectibles,
                 lastCollectible = if (newlyUnlocked) reward else current.lastCollectible
             )
-        )
-        return newlyUnlocked
-    }
+            next to newlyUnlocked
+        }
 
     fun recordDaily(dayKey: String) {
-        val current = _save.value
-        if (dayKey in current.dailyHistory) return
-        write(current.copy(dailyHistory = (current.dailyHistory + dayKey).takeLast(120)))
+        mutator.mutate { current ->
+            if (dayKey in current.dailyHistory) current
+            else current.copy(dailyHistory = (current.dailyHistory + dayKey).takeLast(120))
+        }
     }
 
     fun markTutorialSeen() {
-        if (_save.value.tutorialSeen) return
-        write(_save.value.copy(tutorialSeen = true))
+        mutator.mutate { current ->
+            if (current.tutorialSeen) current else current.copy(tutorialSeen = true)
+        }
     }
 
-    fun setReducedMotion(value: Boolean) = write(_save.value.copy(reducedMotion = value))
+    fun setReducedMotion(value: Boolean) =
+        mutator.mutate { it.copy(reducedMotion = value) }
 
-    fun setMusicEnabled(value: Boolean) = write(_save.value.copy(musicEnabled = value))
+    fun setMusicEnabled(value: Boolean) =
+        mutator.mutate { it.copy(musicEnabled = value) }
 
-    fun setSoundEnabled(value: Boolean) = write(_save.value.copy(soundEnabled = value))
+    fun setSoundEnabled(value: Boolean) =
+        mutator.mutate { it.copy(soundEnabled = value) }
 
-    fun setHighContrast(value: Boolean) = write(_save.value.copy(highContrast = value))
+    fun setHighContrast(value: Boolean) =
+        mutator.mutate { it.copy(highContrast = value) }
 
-    fun resetProgress() = write(SaveData())
+    fun resetProgress() {
+        mutator.mutate { SaveData() }
+    }
 
     // ------------------------------------------------------------ derived data
 

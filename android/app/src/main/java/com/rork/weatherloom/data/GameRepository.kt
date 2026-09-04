@@ -3,6 +3,9 @@ package com.rork.weatherloom.data
 import android.content.Context
 import android.content.SharedPreferences
 import com.rork.weatherloom.core.level.LevelLibrary
+import com.rork.weatherloom.core.terrarium.GrowthState
+import com.rork.weatherloom.core.terrarium.PlayerInventory
+import com.rork.weatherloom.core.terrarium.TerrariumLayout
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,7 +36,10 @@ data class SaveData(
     val reducedMotion: Boolean = false,
     val highContrast: Boolean = false,
     val musicEnabled: Boolean = true,
-    val soundEnabled: Boolean = true
+    val soundEnabled: Boolean = true,
+    val terrariumInventory: PlayerInventory = PlayerInventory(),
+    val terrariumLayout: TerrariumLayout = TerrariumLayout(),
+    val terrariumGrowth: List<GrowthState> = emptyList()
 )
 
 /**

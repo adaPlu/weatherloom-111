@@ -1,16 +1,18 @@
 package com.rork.weatherloom.data
 
+import com.rork.weatherloom.core.terrarium.InventoryEntry
+import com.rork.weatherloom.core.terrarium.PlayerInventory
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-const val CURRENT_SAVE_SCHEMA = 2
+const val CURRENT_SAVE_SCHEMA = 3
 
 /**
- * Explicit, deterministic save decoding. Schema-1 saves are upgraded without
- * changing valid player progress or settings. Unknown fields remain forward-tolerant.
- * Corrupt payloads fall back to a fresh current-schema save.
+ * Explicit, deterministic save decoding. Legacy saves are upgraded without changing
+ * valid player progress/settings. Unknown fields remain forward-tolerant. Corrupt
+ * payloads fall back to a fresh current-schema save.
  */
 object SaveMigration {
 
@@ -24,7 +26,7 @@ object SaveMigration {
             val decoded = json.decodeFromJsonElement(SaveData.serializer(), element)
 
             when {
-                declaredSchema <= 1 -> migrateV1(decoded)
+                declaredSchema <= 2 -> migrateLegacy(decoded)
                 declaredSchema == CURRENT_SAVE_SCHEMA ->
                     canonicalizeKnown(decoded.copy(schema = CURRENT_SAVE_SCHEMA))
                 else ->
@@ -36,8 +38,20 @@ object SaveMigration {
         }.getOrElse { SaveData() }
     }
 
-    private fun migrateV1(v1: SaveData): SaveData =
-        canonicalizeKnown(v1.copy(schema = CURRENT_SAVE_SCHEMA))
+    private fun migrateLegacy(legacy: SaveData): SaveData {
+        val canonical = canonicalizeKnown(legacy.copy(schema = CURRENT_SAVE_SCHEMA))
+        val existingKeys = canonical.terrariumInventory.entries.map { it.stableKey }.toSet()
+        val migratedEntries = canonical.collectibles
+            .filter { it.isNotBlank() }
+            .map { id -> InventoryEntry(itemId = id, unlockSource = "legacy_collectible") }
+            .filterNot { it.stableKey in existingKeys }
+
+        return canonical.copy(
+            terrariumInventory = PlayerInventory(
+                canonical.terrariumInventory.entries + migratedEntries
+            )
+        )
+    }
 
     private fun canonicalizeKnown(save: SaveData): SaveData =
         save.copy(

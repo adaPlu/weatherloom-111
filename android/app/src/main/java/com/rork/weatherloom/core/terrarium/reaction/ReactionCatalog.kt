@@ -15,6 +15,16 @@ data class ReactionCatalog(
         require(ruleIds.distinct().size == ruleIds.size) {
             "reaction rule ids must be unique"
         }
+
+        val durableDefinitionsById = mutableMapOf<String, DurableReactionEventDefinition>()
+        for (rule in rules) {
+            for (definition in rule.result.durableEvents) {
+                val previous = durableDefinitionsById.putIfAbsent(definition.id, definition)
+                require(previous == null || previous == definition) {
+                    "durable reaction event id '${definition.id}' has conflicting definitions"
+                }
+            }
+        }
     }
 
     companion object {

@@ -1,5 +1,6 @@
 package com.rork.weatherloom.data
 
+import com.rork.weatherloom.core.terrarium.GrowthPulseService
 import com.rork.weatherloom.core.terrarium.TerrariumCatalog
 import com.rork.weatherloom.core.terrarium.reaction.DurableReactionEvent
 import com.rork.weatherloom.core.terrarium.reaction.ReactionCatalog
@@ -14,7 +15,12 @@ data class TerrariumReactionSaveResult(
 )
 
 /**
- * Pure bridge between durable [SaveData] and the deterministic [ReactionEngine].
+ * Pure bridge between durable [SaveData] and the deterministic Terrarium evaluators.
+ *
+ * A relevant persisted Weather Echo first produces deterministic Growth Pulses, then the
+ * ReactionEngine evaluates the same updated growth snapshot. Both growth and durable
+ * reaction IDs are returned as one [SaveData] value so the repository can commit them
+ * through its single serialized mutation gate.
  *
  * Visual reaction state is recomputable and is never persisted. Durable event IDs are
  * appended exactly once in canonical order so restarts/re-evaluation cannot duplicate a
@@ -24,6 +30,8 @@ class TerrariumReactionSaveService(
     private val catalog: TerrariumCatalog,
     private val reactions: ReactionCatalog
 ) {
+    private val growthPulseService = GrowthPulseService(catalog)
+
     fun evaluateAndApply(save: SaveData): TerrariumReactionSaveResult {
         val environment = save.terrariumEnvironment
             ?: return TerrariumReactionSaveResult(
@@ -32,30 +40,41 @@ class TerrariumReactionSaveService(
                 newlyAppliedDurableEvents = emptyList()
             )
 
-        val reactionResult = ReactionEngine.evaluate(
+        val updatedGrowth = growthPulseService.apply(
             layout = save.terrariumLayout,
-            growthStates = save.terrariumGrowth,
+            current = save.terrariumGrowth,
+            echo = environment.weatherEcho
+        )
+        val saveAfterGrowth = if (updatedGrowth == save.terrariumGrowth) {
+            save
+        } else {
+            save.copy(terrariumGrowth = updatedGrowth)
+        }
+
+        val reactionResult = ReactionEngine.evaluate(
+            layout = saveAfterGrowth.terrariumLayout,
+            growthStates = saveAfterGrowth.terrariumGrowth,
             environment = environment,
             catalog = catalog,
             reactions = reactions,
-            appliedDurableEventIds = save.appliedTerrariumReactionEventIds.toSet()
+            appliedDurableEventIds = saveAfterGrowth.appliedTerrariumReactionEventIds.toSet()
         )
 
         val newlyApplied = reactionResult.pendingDurableEvents
         if (newlyApplied.isEmpty()) {
             return TerrariumReactionSaveResult(
-                save = save,
+                save = saveAfterGrowth,
                 reactions = reactionResult,
                 newlyAppliedDurableEvents = emptyList()
             )
         }
 
         val appliedIds = (
-            save.appliedTerrariumReactionEventIds + newlyApplied.map { it.id }
+            saveAfterGrowth.appliedTerrariumReactionEventIds + newlyApplied.map { it.id }
         ).distinct().sorted()
 
         return TerrariumReactionSaveResult(
-            save = save.copy(appliedTerrariumReactionEventIds = appliedIds),
+            save = saveAfterGrowth.copy(appliedTerrariumReactionEventIds = appliedIds),
             reactions = reactionResult,
             newlyAppliedDurableEvents = newlyApplied
         )

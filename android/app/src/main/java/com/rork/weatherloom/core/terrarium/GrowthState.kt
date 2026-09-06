@@ -35,7 +35,8 @@ data class GrowthState(
     val growthProfileId: String,
     val stageIndex: Int = 0,
     val growthPulsesApplied: Int = 0,
-    val lastRelevantEchoId: String? = null
+    val lastRelevantEchoId: String? = null,
+    val appliedEchoIds: List<String> = emptyList()
 ) {
     init {
         require(instanceId.isNotBlank()) { "growth instanceId must not be blank" }
@@ -43,5 +44,9 @@ data class GrowthState(
         require(stageIndex >= 0) { "growth stageIndex must not be negative" }
         require(growthPulsesApplied >= 0) { "growthPulsesApplied must not be negative" }
         lastRelevantEchoId?.let { require(it.isNotBlank()) { "lastRelevantEchoId must not be blank" } }
+        require(appliedEchoIds.all { it.isNotBlank() }) { "appliedEchoIds must not contain blanks" }
+        require(appliedEchoIds.size == appliedEchoIds.distinct().size) {
+            "appliedEchoIds must be unique"
+        }
     }
 }

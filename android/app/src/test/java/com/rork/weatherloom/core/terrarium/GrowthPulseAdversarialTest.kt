@@ -62,6 +62,21 @@ class GrowthPulseAdversarialTest {
         assertEquals("rainbell-001", returned.single().instanceId)
     }
 
+    @Test
+    fun legacyOrRecoveredGrowthStateCanNeverRegressItsStage() {
+        val legacyBloom = GrowthState(
+            instanceId = "rainbell-001",
+            growthProfileId = "botanical",
+            stageIndex = profile.stages.lastIndex,
+            growthPulsesApplied = 0
+        )
+
+        val result = service.apply(layout, listOf(legacyBloom), rain("echo-new"))
+
+        assertEquals(profile.stages.lastIndex, result.single().stageIndex)
+        assertEquals(GrowthStage.Bloom, profile.stages[result.single().stageIndex])
+    }
+
     private fun rain(id: String) = WeatherEchoSnapshot(
         id = id,
         kinds = listOf(WeatherEchoKind.Rain),

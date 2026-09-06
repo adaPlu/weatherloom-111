@@ -16,6 +16,7 @@ import com.rork.weatherloom.core.sim.SimState
 import com.rork.weatherloom.core.sim.SimulationEngine
 import com.rork.weatherloom.core.sim.ThreadType
 import com.rork.weatherloom.core.sim.WeatherThread
+import com.rork.weatherloom.core.weather.WeatherEchoDeriver
 import com.rork.weatherloom.data.GameRepository
 import com.rork.weatherloom.data.Rating
 import kotlinx.coroutines.Dispatchers
@@ -305,7 +306,15 @@ class PuzzleViewModel(app: Application) : AndroidViewModel(app) {
         }
         var unlocked: String? = null
         if (result.solved && !s.isDaily) {
-            val newly = repo.recordSolve(level.id, rating, scoredThreads.size, scoredCells, level.reward)
+            val weatherEcho = WeatherEchoDeriver.derive(result)
+            val newly = repo.recordSolve(
+                level.id,
+                rating,
+                scoredThreads.size,
+                scoredCells,
+                level.reward,
+                weatherEcho
+            )
             if (newly) unlocked = level.reward
         }
         if (result.solved && s.isDaily) {

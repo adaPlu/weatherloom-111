@@ -1,7 +1,12 @@
 package com.rork.weatherloom.core.terrarium
 
-import com.rork.weatherloom.core.terrarium.reaction.EnvironmentState
 import com.rork.weatherloom.core.weather.WeatherEchoKind
+import com.rork.weatherloom.core.weather.WeatherEchoSnapshot
+
+/** Minimal environmental contract required by deterministic Terrarium growth. */
+interface GrowthPulseEnvironment {
+    val weatherEcho: WeatherEchoSnapshot
+}
 
 /** Result of applying one serialized Weather Echo to Terrarium growth. */
 data class GrowthPulseResult(
@@ -20,7 +25,7 @@ object GrowthPulseService {
     fun apply(
         layout: TerrariumLayout,
         growthStates: List<GrowthState>,
-        environment: EnvironmentState,
+        environment: GrowthPulseEnvironment,
         catalog: TerrariumCatalog
     ): GrowthPulseResult {
         val growthInstanceIds = growthStates.map { it.instanceId }
@@ -82,7 +87,7 @@ object GrowthPulseService {
         )
     }
 
-    private fun weatherSemanticTags(environment: EnvironmentState): Set<String> {
+    private fun weatherSemanticTags(environment: GrowthPulseEnvironment): Set<String> {
         val tags = mutableSetOf<String>()
         for (kind in environment.weatherEcho.kinds) {
             when (kind) {

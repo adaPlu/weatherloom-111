@@ -1,5 +1,6 @@
 package com.rork.weatherloom.core.terrarium.reaction
 
+import com.rork.weatherloom.core.terrarium.GrowthPulseEnvironment
 import com.rork.weatherloom.core.weather.WeatherEchoSnapshot
 import kotlinx.serialization.Serializable
 
@@ -9,9 +10,9 @@ import kotlinx.serialization.Serializable
  */
 @Serializable
 data class EnvironmentState(
-    val weatherEcho: WeatherEchoSnapshot,
+    override val weatherEcho: WeatherEchoSnapshot,
     val modifiers: List<String> = emptyList()
-) {
+) : GrowthPulseEnvironment {
     init {
         require(modifiers.distinct().size == modifiers.size) {
             "environment modifiers must be unique"

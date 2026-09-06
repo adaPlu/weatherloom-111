@@ -74,10 +74,11 @@ class GrowthPulseService(
                 growthProfileId = profileId
             )
             val nextPulseCount = base.growthPulsesApplied + 1
-            val nextStageIndex = minOf(
+            val stageFromPulses = minOf(
                 nextPulseCount / profile.pulsesPerStage,
                 profile.stages.lastIndex
             )
+            val nextStageIndex = maxOf(base.stageIndex, stageFromPulses)
             updated[placement.instanceId] = base.copy(
                 stageIndex = nextStageIndex,
                 growthPulsesApplied = nextPulseCount,

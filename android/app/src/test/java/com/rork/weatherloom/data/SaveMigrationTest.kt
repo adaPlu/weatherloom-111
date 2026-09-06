@@ -74,7 +74,7 @@ class SaveMigrationTest {
 
         val migrated = SaveMigration.decode(raw, json)
 
-        assertEquals(4, migrated.schema)
+        assertEquals(CURRENT_SAVE_SCHEMA, migrated.schema)
         assertEquals(450, migrated.playerProgression.xp)
         assertEquals(100, migrated.playerProgression.awardedLevelXp.getValue("seedling"))
         assertEquals(150, migrated.playerProgression.awardedLevelXp.getValue("bloom"))

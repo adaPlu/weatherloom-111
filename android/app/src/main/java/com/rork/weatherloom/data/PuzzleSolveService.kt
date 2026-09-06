@@ -1,5 +1,8 @@
 package com.rork.weatherloom.data
 
+import com.rork.weatherloom.core.terrarium.reaction.EnvironmentState
+import com.rork.weatherloom.core.weather.WeatherEchoSnapshot
+
 /** Durable result of recording a solved authored puzzle. */
 data class PuzzleSolveResult(
     val save: SaveData,
@@ -9,9 +12,10 @@ data class PuzzleSolveResult(
 )
 
 /**
- * Pure solved-level reducer. Progress, XP, legacy collectible presentation state, and
- * Terrarium ownership are produced as one new [SaveData] value so the repository can
- * persist them atomically through its existing [SaveStateMutator].
+ * Pure solved-level reducer. Progress, XP, legacy collectible presentation state,
+ * Terrarium ownership, and the latest deterministic Weather Echo are produced as one
+ * new [SaveData] value so the repository persists them atomically through its existing
+ * [SaveStateMutator].
  */
 class PuzzleSolveService(
     private val rewardBridge: PuzzleRewardBridge
@@ -22,7 +26,8 @@ class PuzzleSolveService(
         rating: Rating,
         strokes: Int,
         cells: Int,
-        rewardId: String?
+        rewardId: String?,
+        weatherEcho: WeatherEchoSnapshot? = null
     ): PuzzleSolveResult {
         val record = save.levels[levelId] ?: LevelRecord()
         val bestRating = maxOf(record.rating, rating.ordinal)
@@ -44,7 +49,10 @@ class PuzzleSolveService(
             } else {
                 save.collectibles
             },
-            lastCollectible = if (newlyUnlockedCollectible) rewardId else save.lastCollectible
+            lastCollectible = if (newlyUnlockedCollectible) rewardId else save.lastCollectible,
+            terrariumEnvironment = weatherEcho
+                ?.let { EnvironmentState(weatherEcho = it) }
+                ?: save.terrariumEnvironment
         )
 
         val terrariumReward = rewardBridge.grant(

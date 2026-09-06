@@ -20,6 +20,7 @@ import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -126,6 +127,16 @@ fun AppNavigation() {
             }
         ) {
             composable(Tab.Terrarium.route) {
+                // Evaluate only when meaningful causal inputs change. Durable event IDs are
+                // applied in the repository, while visual reaction state remains recomputable.
+                LaunchedEffect(
+                    save.terrariumEnvironment?.weatherEcho?.id,
+                    save.terrariumLayout,
+                    save.terrariumGrowth
+                ) {
+                    repo.evaluateTerrariumReactions()
+                }
+
                 val unlocked = save.collectibles.mapNotNull { LevelLibrary.collectible(it) }
                 val nextId = repo.nextUnsolved()
                 TerrariumScreen(

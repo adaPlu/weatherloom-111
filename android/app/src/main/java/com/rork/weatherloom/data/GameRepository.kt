@@ -7,6 +7,10 @@ import com.rork.weatherloom.core.terrarium.GrowthState
 import com.rork.weatherloom.core.terrarium.PlayerInventory
 import com.rork.weatherloom.core.terrarium.TerrariumCatalog
 import com.rork.weatherloom.core.terrarium.TerrariumLayout
+import com.rork.weatherloom.core.terrarium.reaction.EnvironmentState
+import com.rork.weatherloom.core.terrarium.reaction.ReactionCatalog
+import com.rork.weatherloom.core.terrarium.reaction.ReactionResult
+import com.rork.weatherloom.core.weather.WeatherEchoSnapshot
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -41,7 +45,9 @@ data class SaveData(
     val playerProgression: PlayerProgression = PlayerProgression(),
     val terrariumInventory: PlayerInventory = PlayerInventory(),
     val terrariumLayout: TerrariumLayout = TerrariumLayout(),
-    val terrariumGrowth: List<GrowthState> = emptyList()
+    val terrariumGrowth: List<GrowthState> = emptyList(),
+    val terrariumEnvironment: EnvironmentState? = null,
+    val appliedTerrariumReactionEventIds: List<String> = emptyList()
 )
 
 /**
@@ -53,12 +59,19 @@ class GameRepository private constructor(context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("weatherloom", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+
+    private val terrariumCatalog = TerrariumCatalog.decode(
+        context.assets.open("terrarium_items.json").bufferedReader().use { it.readText() }
+    )
+    private val reactionCatalog = ReactionCatalog.decode(
+        context.assets.open("terrarium_reactions.json").bufferedReader().use { it.readText() }
+    )
     private val puzzleSolveService = PuzzleSolveService(
-        PuzzleRewardBridge(
-            TerrariumCatalog.decode(
-                context.assets.open("terrarium_items.json").bufferedReader().use { it.readText() }
-            )
-        )
+        PuzzleRewardBridge(terrariumCatalog)
+    )
+    private val terrariumReactionSaveService = TerrariumReactionSaveService(
+        terrariumCatalog,
+        reactionCatalog
     )
 
     private val _save = MutableStateFlow(read())
@@ -87,8 +100,15 @@ class GameRepository private constructor(context: Context) {
         }
     }
 
-    /** Stores a win, upgrades the rating, and atomically grants its Terrarium reward. */
-    fun recordSolve(levelId: String, rating: Rating, strokes: Int, cells: Int, reward: String?): Boolean =
+    /** Stores a win, upgrades the rating, and atomically grants its Terrarium reward/echo. */
+    fun recordSolve(
+        levelId: String,
+        rating: Rating,
+        strokes: Int,
+        cells: Int,
+        reward: String?,
+        weatherEcho: WeatherEchoSnapshot? = null
+    ): Boolean =
         mutator.mutateWithResult { current ->
             val result = puzzleSolveService.recordSolve(
                 save = current,
@@ -96,9 +116,20 @@ class GameRepository private constructor(context: Context) {
                 rating = rating,
                 strokes = strokes,
                 cells = cells,
-                rewardId = reward
+                rewardId = reward,
+                weatherEcho = weatherEcho
             )
             result.save to result.newlyUnlockedCollectible
+        }
+
+    /**
+     * Recomputes ephemeral Terrarium reactions and applies any new durable event IDs through
+     * the same serialized save gate. Calling this repeatedly is safe and idempotent.
+     */
+    fun evaluateTerrariumReactions(): ReactionResult =
+        mutator.mutateWithResult { current ->
+            val result = terrariumReactionSaveService.evaluateAndApply(current)
+            result.save to result.reactions
         }
 
     fun recordDaily(dayKey: String) {

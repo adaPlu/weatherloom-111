@@ -2,12 +2,13 @@ package com.rork.weatherloom.data
 
 import com.rork.weatherloom.core.terrarium.InventoryEntry
 import com.rork.weatherloom.core.terrarium.PlayerInventory
+import com.rork.weatherloom.core.terrarium.reaction.isStableReactionId
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-const val CURRENT_SAVE_SCHEMA = 4
+const val CURRENT_SAVE_SCHEMA = 5
 
 /**
  * Explicit, deterministic save decoding. Legacy saves are upgraded without changing
@@ -28,6 +29,7 @@ object SaveMigration {
             when {
                 declaredSchema <= 2 -> migratePreTerrarium(decoded)
                 declaredSchema == 3 -> migratePlayerProgression(decoded)
+                declaredSchema == 4 -> migrateTerrariumReactionState(decoded)
                 declaredSchema == CURRENT_SAVE_SCHEMA ->
                     canonicalizeKnown(decoded.copy(schema = CURRENT_SAVE_SCHEMA))
                 else ->
@@ -61,6 +63,10 @@ object SaveMigration {
             canonicalizeKnown(schemaThree.copy(schema = CURRENT_SAVE_SCHEMA))
         )
 
+    /** Schema 4 predates persisted Terrarium environment/durable reaction event state. */
+    private fun migrateTerrariumReactionState(schemaFour: SaveData): SaveData =
+        canonicalizeKnown(schemaFour.copy(schema = CURRENT_SAVE_SCHEMA))
+
     private fun backfillPlayerProgression(save: SaveData): SaveData {
         val awarded = save.levels.mapNotNull { (levelId, record) ->
             val xp = PlayerXpRules.cumulativeXpFor(record.ratingEnum)
@@ -89,6 +95,10 @@ object SaveMigration {
             .mapValues { (_, xp) -> xp.coerceIn(0, PlayerXpRules.FLOURISH_XP) }
             .filterValues { it > 0 }
         val minimumXpFromLedger = awardedLevelXp.values.sum()
+        val reactionEventIds = save.appliedTerrariumReactionEventIds
+            .filter(::isStableReactionId)
+            .distinct()
+            .sorted()
 
         return save.copy(
             levels = levels,
@@ -97,7 +107,8 @@ object SaveMigration {
             playerProgression = PlayerProgression(
                 xp = maxOf(save.playerProgression.xp.coerceAtLeast(0), minimumXpFromLedger),
                 awardedLevelXp = awardedLevelXp
-            )
+            ),
+            appliedTerrariumReactionEventIds = reactionEventIds
         )
     }
 }

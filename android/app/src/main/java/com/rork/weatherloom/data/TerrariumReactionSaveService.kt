@@ -32,24 +32,29 @@ class TerrariumReactionSaveService(
     private val reactions: ReactionCatalog
 ) {
     private val growthPulseService = GrowthPulseService(catalog)
+    private val discoveryPayloadByEventId = reactions.rules
+        .flatMap { it.result.durableEvents }
+        .filter { it.kind == DurableReactionEventKind.DiscoveryCandidate }
+        .associate { it.id to it.payloadId }
 
     fun evaluateAndApply(save: SaveData): TerrariumReactionSaveResult {
-        val environment = save.terrariumEnvironment
+        val saveWithDiscoveryBackfill = backfillKnownDiscoveries(save)
+        val environment = saveWithDiscoveryBackfill.terrariumEnvironment
             ?: return TerrariumReactionSaveResult(
-                save = save,
+                save = saveWithDiscoveryBackfill,
                 reactions = ReactionResult(),
                 newlyAppliedDurableEvents = emptyList()
             )
 
         val updatedGrowth = growthPulseService.apply(
-            layout = save.terrariumLayout,
-            current = save.terrariumGrowth,
+            layout = saveWithDiscoveryBackfill.terrariumLayout,
+            current = saveWithDiscoveryBackfill.terrariumGrowth,
             echo = environment.weatherEcho
         )
-        val saveAfterGrowth = if (updatedGrowth == save.terrariumGrowth) {
-            save
+        val saveAfterGrowth = if (updatedGrowth == saveWithDiscoveryBackfill.terrariumGrowth) {
+            saveWithDiscoveryBackfill
         } else {
-            save.copy(terrariumGrowth = updatedGrowth)
+            saveWithDiscoveryBackfill.copy(terrariumGrowth = updatedGrowth)
         }
 
         val reactionResult = ReactionEngine.evaluate(
@@ -91,5 +96,19 @@ class TerrariumReactionSaveService(
             reactions = reactionResult,
             newlyAppliedDurableEvents = newlyApplied
         )
+    }
+
+    private fun backfillKnownDiscoveries(save: SaveData): SaveData {
+        val discoveriesFromAppliedEvents = save.appliedTerrariumReactionEventIds
+            .mapNotNull(discoveryPayloadByEventId::get)
+        val discoveries = (
+            save.terrariumDiscoveries + discoveriesFromAppliedEvents
+        ).distinct().sorted()
+
+        return if (discoveries == save.terrariumDiscoveries) {
+            save
+        } else {
+            save.copy(terrariumDiscoveries = discoveries)
+        }
     }
 }

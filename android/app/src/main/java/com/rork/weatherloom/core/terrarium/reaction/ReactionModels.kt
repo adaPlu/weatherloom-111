@@ -42,10 +42,12 @@ data class DurableReactionEventDefinition(
 @Serializable
 data class ReactionRuleOutput(
     val visualTags: List<String> = emptyList(),
-    val durableEvents: List<DurableReactionEventDefinition> = emptyList()
+    val durableEvents: List<DurableReactionEventDefinition> = emptyList(),
+    val visitorIds: List<String> = emptyList()
 ) {
     init {
         requireCanonicalStableIds(visualTags, "reaction visual tags")
+        requireCanonicalStableIds(visitorIds, "reaction visitor ids")
         val durableIds = durableEvents.map { it.id }
         require(durableIds.distinct().size == durableIds.size) {
             "reaction durable event ids must be unique within a rule"
@@ -53,8 +55,8 @@ data class ReactionRuleOutput(
         require(durableIds == durableIds.sorted()) {
             "reaction durable events must use canonical id ordering"
         }
-        require(visualTags.isNotEmpty() || durableEvents.isNotEmpty()) {
-            "reaction output must contain a visual tag or durable event"
+        require(visualTags.isNotEmpty() || durableEvents.isNotEmpty() || visitorIds.isNotEmpty()) {
+            "reaction output must contain a visual tag, visitor, or durable event"
         }
     }
 }
@@ -87,6 +89,20 @@ data class ReactionVisualState(
     }
 }
 
+/** Recomputable visitor presence. This is presentation state and is never persisted. */
+@Serializable
+data class VisitorPresence(
+    val visitorId: String,
+    val ruleId: String,
+    val sourceInstanceId: String
+) {
+    init {
+        requireStableReactionId(visitorId, "visitor id")
+        requireStableReactionId(ruleId, "visitor rule id")
+        require(sourceInstanceId.isNotBlank()) { "visitor sourceInstanceId must not be blank" }
+    }
+}
+
 @Serializable
 data class DurableReactionEvent(
     val id: String,
@@ -106,7 +122,8 @@ data class DurableReactionEvent(
 @Serializable
 data class ReactionResult(
     val visualStates: List<ReactionVisualState> = emptyList(),
-    val pendingDurableEvents: List<DurableReactionEvent> = emptyList()
+    val pendingDurableEvents: List<DurableReactionEvent> = emptyList(),
+    val visitors: List<VisitorPresence> = emptyList()
 ) {
     init {
         val visualIds = visualStates.map { it.instanceId }
@@ -123,6 +140,14 @@ data class ReactionResult(
         }
         require(eventIds == eventIds.sorted()) {
             "pending durable reaction events must use canonical id ordering"
+        }
+
+        val visitorIds = visitors.map { it.visitorId }
+        require(visitorIds.distinct().size == visitorIds.size) {
+            "reaction visitors must contain unique visitor ids"
+        }
+        require(visitorIds == visitorIds.sorted()) {
+            "reaction visitors must use canonical visitor ordering"
         }
     }
 }

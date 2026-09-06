@@ -47,7 +47,8 @@ data class SaveData(
     val terrariumLayout: TerrariumLayout = TerrariumLayout(),
     val terrariumGrowth: List<GrowthState> = emptyList(),
     val terrariumEnvironment: EnvironmentState? = null,
-    val appliedTerrariumReactionEventIds: List<String> = emptyList()
+    val appliedTerrariumReactionEventIds: List<String> = emptyList(),
+    val terrariumDiscoveries: List<String> = emptyList()
 )
 
 /**

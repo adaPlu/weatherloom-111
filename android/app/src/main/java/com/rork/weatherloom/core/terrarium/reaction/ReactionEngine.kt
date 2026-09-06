@@ -7,7 +7,7 @@ import com.rork.weatherloom.core.terrarium.TerrariumLayout
 
 /**
  * Pure deterministic evaluator from Terrarium domain snapshots to recomputable visual
- * state plus idempotent durable event candidates. It performs no persistence itself.
+ * and visitor state plus idempotent durable event candidates. It performs no persistence itself.
  */
 object ReactionEngine {
 
@@ -25,6 +25,7 @@ object ReactionEngine {
         }
 
         val visualTagsByInstance = mutableMapOf<String, MutableSet<String>>()
+        val visitorsById = mutableMapOf<String, VisitorPresence>()
         val durableEventsById = mutableMapOf<String, DurableReactionEvent>()
         val orderedRules = reactions.rules.sortedBy { it.id }
 
@@ -38,6 +39,17 @@ object ReactionEngine {
                     visualTagsByInstance
                         .getOrPut(placement.instanceId) { mutableSetOf() }
                         .addAll(rule.result.visualTags)
+                }
+
+                for (visitorId in rule.result.visitorIds) {
+                    visitorsById.putIfAbsent(
+                        visitorId,
+                        VisitorPresence(
+                            visitorId = visitorId,
+                            ruleId = rule.id,
+                            sourceInstanceId = placement.instanceId
+                        )
+                    )
                 }
 
                 for (definition in rule.result.durableEvents) {
@@ -62,12 +74,13 @@ object ReactionEngine {
                 visualTags = visualTagsByInstance.getValue(instanceId).sorted()
             )
         }
-
+        val visitors = visitorsById.keys.sorted().map(visitorsById::getValue)
         val durableEvents = durableEventsById.keys.sorted().map(durableEventsById::getValue)
 
         return ReactionResult(
             visualStates = visualStates,
-            pendingDurableEvents = durableEvents
+            pendingDurableEvents = durableEvents,
+            visitors = visitors
         )
     }
 

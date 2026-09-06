@@ -8,7 +8,7 @@ import kotlinx.serialization.json.intOrNull
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
-const val CURRENT_SAVE_SCHEMA = 5
+const val CURRENT_SAVE_SCHEMA = 6
 
 /**
  * Explicit, deterministic save decoding. Legacy saves are upgraded without changing
@@ -30,6 +30,7 @@ object SaveMigration {
                 declaredSchema <= 2 -> migratePreTerrarium(decoded)
                 declaredSchema == 3 -> migratePlayerProgression(decoded)
                 declaredSchema == 4 -> migrateTerrariumReactionState(decoded)
+                declaredSchema == 5 -> migrateVisitorDiscoveryState(decoded)
                 declaredSchema == CURRENT_SAVE_SCHEMA ->
                     canonicalizeKnown(decoded.copy(schema = CURRENT_SAVE_SCHEMA))
                 else ->
@@ -67,6 +68,10 @@ object SaveMigration {
     private fun migrateTerrariumReactionState(schemaFour: SaveData): SaveData =
         canonicalizeKnown(schemaFour.copy(schema = CURRENT_SAVE_SCHEMA))
 
+    /** Schema 5 predates the durable discovery registry introduced with visitors. */
+    private fun migrateVisitorDiscoveryState(schemaFive: SaveData): SaveData =
+        canonicalizeKnown(schemaFive.copy(schema = CURRENT_SAVE_SCHEMA))
+
     private fun backfillPlayerProgression(save: SaveData): SaveData {
         val awarded = save.levels.mapNotNull { (levelId, record) ->
             val xp = PlayerXpRules.cumulativeXpFor(record.ratingEnum)
@@ -99,6 +104,10 @@ object SaveMigration {
             .filter(::isStableReactionId)
             .distinct()
             .sorted()
+        val discoveries = save.terrariumDiscoveries
+            .filter(::isStableReactionId)
+            .distinct()
+            .sorted()
 
         return save.copy(
             levels = levels,
@@ -108,7 +117,8 @@ object SaveMigration {
                 xp = maxOf(save.playerProgression.xp.coerceAtLeast(0), minimumXpFromLedger),
                 awardedLevelXp = awardedLevelXp
             ),
-            appliedTerrariumReactionEventIds = reactionEventIds
+            appliedTerrariumReactionEventIds = reactionEventIds,
+            terrariumDiscoveries = discoveries
         )
     }
 }

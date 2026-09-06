@@ -67,7 +67,7 @@ class GrowthPulseServiceTest {
             TerrariumItem(
                 id = "stone",
                 nameKey = "stone",
-                category = TerrariumCategory.Accent,
+                category = TerrariumCategory.Decoration,
                 visualFamily = "stone",
                 footprint = TerrariumFootprint(1, 1),
                 allowedRotations = listOf(TerrariumRotation.Deg0),

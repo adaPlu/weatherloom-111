@@ -9,6 +9,7 @@
       },
       "result": {
         "visualTags": ["bloom", "wet"],
+        "visitorIds": ["butterfly"],
         "durableEvents": [
           {
             "id": "discovery.rainbell_after_rain",

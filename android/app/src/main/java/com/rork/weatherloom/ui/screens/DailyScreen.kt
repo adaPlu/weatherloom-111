@@ -95,7 +95,7 @@ fun DailyScreen(
                             lvl.objectives.joinToString(" · ") { "${it.label} ${it.target}" }
                         } ?: "",
                         style = MaterialTheme.typography.bodySmall,
-                        color = Loom.Moss
+                        color = Loom.TextMuted
                     )
                     Spacer(Modifier.height(16.dp))
                     if (completedToday) {
@@ -128,7 +128,7 @@ fun DailyScreen(
                         enabled = today != null,
                         icon = Icons.Rounded.PlayArrow,
                         modifier = Modifier.fillMaxWidth(),
-                        container = if (completedToday) Loom.Moisture else Loom.Coral
+                        container = if (completedToday) Loom.MoistureStrong else Loom.CoralStrong
                     )
                 }
             }
@@ -156,7 +156,7 @@ fun DailyScreen(
                 Text(
                     "The last two weeks",
                     style = MaterialTheme.typography.labelMedium,
-                    color = Loom.Moss
+                    color = Loom.TextMuted
                 )
                 Spacer(Modifier.height(12.dp))
                 val keys = (13 downTo 0).map { DailyForecast.dayKey(it) }
@@ -171,7 +171,7 @@ fun DailyScreen(
                                 .clip(RoundedCornerShape(9.dp))
                                 .background(
                                     when {
-                                        done -> Loom.Moisture
+                                        done -> Loom.MoistureStrong
                                         isToday -> Loom.CoralSoft
                                         else -> Loom.SurfaceSunk
                                     }
@@ -181,7 +181,7 @@ fun DailyScreen(
                             Text(
                                 key.takeLast(2).trimStart('0'),
                                 style = MaterialTheme.typography.labelSmall,
-                                color = if (done) Loom.Surface else Loom.Moss,
+                                color = if (done) Loom.Surface else Loom.TextMuted,
                                 textAlign = TextAlign.Center
                             )
                         }
@@ -201,7 +201,7 @@ fun DailyScreen(
                 "Daily boards are grown from validated hollows and the calendar date, never from " +
                     "random tiles — so there is always a solution waiting.",
                 style = MaterialTheme.typography.bodySmall,
-                color = Loom.Moss,
+                color = Loom.TextMuted,
                 modifier = Modifier.padding(16.dp)
             )
         }

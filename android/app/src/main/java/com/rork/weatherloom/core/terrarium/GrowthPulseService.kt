@@ -61,6 +61,7 @@ class GrowthPulseService(
                     "growth profile changed for instance ${placement.instanceId}"
                 }
                 catalog.requireValid(existing)
+                if (existing.stageIndex == profile.stages.lastIndex) return@forEach
             }
 
             val consumedEchoIds = buildSet {

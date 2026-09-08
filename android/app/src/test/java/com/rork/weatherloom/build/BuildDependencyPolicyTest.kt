@@ -32,13 +32,14 @@ class BuildDependencyPolicyTest {
     }
 
     private fun repoFile(relative: String): File {
-        var current: File? = File(System.getProperty("user.dir")).absoluteFile
+        val userDir = requireNotNull(System.getProperty("user.dir")) { "user.dir must be available" }
+        var current: File? = File(userDir).absoluteFile
         repeat(8) {
             val base = current ?: error("Could not locate repository file: $relative")
             val candidate = File(base, relative)
             if (candidate.isFile) return candidate
             current = base.parentFile
         }
-        error("Could not locate repository file: $relative from ${System.getProperty("user.dir")}")
+        error("Could not locate repository file: $relative from $userDir")
     }
 }

@@ -1,27 +1,27 @@
 package com.rork.weatherloom.ui.board
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.DrawScope
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.res.painterResource
@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.rork.weatherloom.R
+import com.rork.weatherloom.ui.terrarium.TerrariumRenderPolicy
+import com.rork.weatherloom.ui.terrarium.TerrariumVisualSnapshot
 import kotlin.math.cos
 import kotlin.math.roundToInt
 import kotlin.math.sin
@@ -60,17 +62,18 @@ private const val SPECIMEN_SPAN = 0.17f
 
 /**
  * The player's keepsake: a real needle-felted cloche, photographed once, that grows a
- * new felted species in its moss bed for every biome they finish.
+ * new felted species in its moss bed for every biome they finish. Logical state arrives as
+ * a deterministic snapshot; this renderer only decorates that state with optional motion.
  */
 @Composable
 fun TerrariumScene(
-    unlocked: List<String>,
+    snapshot: TerrariumVisualSnapshot,
+    renderPolicy: TerrariumRenderPolicy,
     phase: Float,
-    modifier: Modifier = Modifier,
-    reducedMotion: Boolean = false
+    modifier: Modifier = Modifier
 ) {
     val cloche = ImageBitmap.imageResource(R.drawable.terrarium_cloche)
-    val specimens = rememberSpecimenArt(unlocked)
+    val specimens = rememberSpecimenArt(snapshot.visibleItemIds)
 
     Canvas(modifier) {
         // The parchment wall behind the photograph, so any letterboxing still belongs.
@@ -91,8 +94,123 @@ fun TerrariumScene(
             dstSize = IntSize(dw.roundToInt(), dh.roundToInt())
         )
 
-        drawPlantedSpecies(unlocked, specimens, dx, dy, dw, dh, phase, reducedMotion)
+        drawAtmosphere(snapshot, renderPolicy, dx, dy, dw, dh, phase)
+        drawPlantedSpecies(
+            snapshot.visibleItemIds,
+            specimens,
+            dx,
+            dy,
+            dw,
+            dh,
+            phase,
+            renderPolicy
+        )
+        drawVisitors(snapshot, renderPolicy, dx, dy, dw, dh, phase)
         drawGlassSheen(dx, dy, dw, dh)
+    }
+}
+
+/** Weather remains visible even with motion disabled; phase only changes decoration offsets. */
+private fun DrawScope.drawAtmosphere(
+    snapshot: TerrariumVisualSnapshot,
+    renderPolicy: TerrariumRenderPolicy,
+    dx: Float,
+    dy: Float,
+    dw: Float,
+    dh: Float,
+    phase: Float
+) {
+    if (snapshot.rainIntensity > 0) {
+        val travel = if (renderPolicy.animateRain) (sin(phase) + 1f) * 0.018f else 0f
+        val count = 6 + snapshot.rainIntensity.coerceIn(0, 3) * 3
+        repeat(count) { index ->
+            val x = dx + dw * (0.25f + (index % 6) * 0.10f)
+            val y = dy + dh * (0.30f + (index / 6) * 0.11f + travel)
+            drawLine(
+                color = Color(0xFF6FA8BE).copy(alpha = 0.62f),
+                start = Offset(x, y),
+                end = Offset(x - dw * 0.008f, y + dh * 0.035f),
+                strokeWidth = maxOf(1f, dw * 0.0035f)
+            )
+        }
+    }
+
+    if (snapshot.snowIntensity > 0) {
+        val drift = if (renderPolicy.animateSnow) sin(phase * 0.8f) * dw * 0.008f else 0f
+        val count = 6 + snapshot.snowIntensity.coerceIn(0, 3) * 3
+        repeat(count) { index ->
+            val x = dx + dw * (0.24f + (index % 6) * 0.105f) + if (index % 2 == 0) drift else -drift
+            val y = dy + dh * (0.31f + (index / 6) * 0.12f)
+            drawCircle(
+                color = Color(0xFFF4F7F5).copy(alpha = 0.90f),
+                radius = maxOf(2f, dw * 0.006f),
+                center = Offset(x, y)
+            )
+        }
+    }
+
+    if (snapshot.windIntensity > 0) {
+        val shift = if (renderPolicy.animateWind) sin(phase * 1.2f) * dw * 0.014f else 0f
+        repeat(snapshot.windIntensity.coerceIn(1, 3)) { index ->
+            val y = dy + dh * (0.39f + index * 0.075f)
+            val startX = dx + dw * 0.27f + shift
+            val path = Path().apply {
+                moveTo(startX, y)
+                cubicTo(
+                    startX + dw * 0.10f, y - dh * 0.018f,
+                    startX + dw * 0.20f, y + dh * 0.018f,
+                    startX + dw * 0.31f, y
+                )
+            }
+            drawPath(
+                path = path,
+                color = Color.White.copy(alpha = 0.42f),
+                style = Stroke(width = maxOf(1f, dw * 0.004f))
+            )
+        }
+    }
+}
+
+/** Visitors are always represented; optional motion only changes their decorative pose. */
+private fun DrawScope.drawVisitors(
+    snapshot: TerrariumVisualSnapshot,
+    renderPolicy: TerrariumRenderPolicy,
+    dx: Float,
+    dy: Float,
+    dw: Float,
+    dh: Float,
+    phase: Float
+) {
+    snapshot.visitors.forEachIndexed { index, visitor ->
+        val flutter = if (renderPolicy.animateVisitors) sin(phase * 2f + index) else 0f
+        val cx = dx + dw * (0.58f + index * 0.045f)
+        val cy = dy + dh * (0.47f + flutter * 0.012f)
+        val span = dw * 0.018f
+        if (visitor.visitorId == "butterfly") {
+            val wing = 0.75f + if (renderPolicy.animateVisitors) kotlin.math.abs(flutter) * 0.35f else 0.15f
+            drawOval(
+                color = Color(0xFFE8B860),
+                topLeft = Offset(cx - span * 1.55f, cy - span * wing),
+                size = Size(span * 1.45f, span * 1.75f * wing)
+            )
+            drawOval(
+                color = Color(0xFFD99762),
+                topLeft = Offset(cx + span * 0.10f, cy - span * wing),
+                size = Size(span * 1.45f, span * 1.75f * wing)
+            )
+            drawLine(
+                color = Color(0xFF5E5A4D),
+                start = Offset(cx, cy - span * 0.55f),
+                end = Offset(cx, cy + span * 0.70f),
+                strokeWidth = maxOf(1f, span * 0.20f)
+            )
+        } else {
+            drawCircle(
+                color = Color(0xFFE8B860),
+                radius = span * 0.65f,
+                center = Offset(cx, cy)
+            )
+        }
     }
 }
 
@@ -108,15 +226,20 @@ private fun DrawScope.drawPlantedSpecies(
     dw: Float,
     dh: Float,
     phase: Float,
-    reducedMotion: Boolean
+    renderPolicy: TerrariumRenderPolicy
 ) {
+    val motionPhase = if (renderPolicy.animateVegetation) phase else 0f
     unlocked.take(PLANTING_SLOTS.size)
         .mapIndexed { index, id -> index to id }
         .sortedBy { PLANTING_SLOTS[it.first].y }
         .forEach { (index, id) ->
             val slot = PLANTING_SLOTS[index]
             val span = dw * SPECIMEN_SPAN * slot.scale
-            val sway = if (reducedMotion) 0f else sin(phase * 1.1f + index * 0.7f) * span * 0.022f
+            val sway = if (renderPolicy.animateVegetation) {
+                sin(phase * 1.1f + index * 0.7f) * span * 0.022f
+            } else {
+                0f
+            }
             val cx = dx + dw * slot.x + sway
             val groundY = dy + dh * slot.y
             val art = specimens[id]
@@ -131,7 +254,7 @@ private fun DrawScope.drawPlantedSpecies(
                 )
             } else {
                 // A species with no photograph yet still shows up, hand-stitched.
-                drawSpecimen(id, Offset(cx, groundY), span * 0.3f, sway, phase)
+                drawSpecimen(id, Offset(cx, groundY), span * 0.3f, sway, motionPhase)
             }
         }
 }

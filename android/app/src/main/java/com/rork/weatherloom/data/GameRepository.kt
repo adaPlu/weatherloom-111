@@ -9,6 +9,7 @@ import com.rork.weatherloom.core.terrarium.TerrariumCatalog
 import com.rork.weatherloom.core.terrarium.TerrariumLayout
 import com.rork.weatherloom.core.terrarium.reaction.EnvironmentState
 import com.rork.weatherloom.core.terrarium.reaction.ReactionCatalog
+import com.rork.weatherloom.core.terrarium.reaction.ReactionEngine
 import com.rork.weatherloom.core.terrarium.reaction.ReactionResult
 import com.rork.weatherloom.core.weather.WeatherEchoSnapshot
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -163,6 +164,23 @@ class GameRepository private constructor(context: Context) {
     }
 
     // ------------------------------------------------------------ derived data
+
+    /**
+     * Recomputable reaction presentation for the current save. This accessor is deliberately
+     * read-only: durable discovery ownership remains with [evaluateTerrariumReactions].
+     */
+    fun terrariumReactionSnapshot(): ReactionResult {
+        val current = _save.value
+        val environment = current.terrariumEnvironment ?: return ReactionResult()
+        return ReactionEngine.evaluate(
+            layout = current.terrariumLayout,
+            growthStates = current.terrariumGrowth,
+            environment = environment,
+            catalog = terrariumCatalog,
+            reactions = reactionCatalog,
+            appliedDurableEventIds = current.appliedTerrariumReactionEventIds.toSet()
+        )
+    }
 
     /** Static authored Terrarium metadata for read-only presentation/query projections. */
     fun terrariumCatalogSnapshot(): TerrariumCatalog = terrariumCatalog

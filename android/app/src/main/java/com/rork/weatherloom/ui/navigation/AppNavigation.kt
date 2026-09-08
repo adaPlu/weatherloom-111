@@ -206,11 +206,13 @@ fun AppNavigation() {
                 AlmanacScreen(
                     content = content,
                     reducedMotion = save.reducedMotion,
+                    highContrast = save.highContrast,
                     musicEnabled = save.musicEnabled,
                     soundEnabled = save.soundEnabled,
                     contentPadding = tabPadding,
                     phase = phase,
                     onReducedMotion = repo::setReducedMotion,
+                    onHighContrast = repo::setHighContrast,
                     onMusicEnabled = {
                         repo.setMusicEnabled(it)
                         LoomAudio.setMusicEnabled(it)

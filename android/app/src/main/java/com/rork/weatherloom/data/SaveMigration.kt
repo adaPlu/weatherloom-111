@@ -127,6 +127,10 @@ object SaveMigration {
  * Serializes all read-modify-write save mutations behind one lock. This prevents
  * two concurrent callers from reading the same old snapshot and losing one update.
  * The persistence callback is invoked only when the resulting state actually changes.
+ *
+ * Saves written by a newer schema remain readable but are deliberately read-only in
+ * this older binary. Re-serializing them through [SaveData] would silently erase fields
+ * this version cannot represent.
  */
 internal class SaveStateMutator(
     initial: SaveData,
@@ -134,10 +138,13 @@ internal class SaveStateMutator(
 ) {
     @Volatile
     private var state: SaveData = initial
+    private val writable = initial.schema <= CURRENT_SAVE_SCHEMA
 
     fun snapshot(): SaveData = state
 
     fun mutate(transform: (SaveData) -> SaveData): SaveData = synchronized(this) {
+        if (!writable) return@synchronized state
+
         val next = transform(state)
         if (next != state) {
             state = next
@@ -148,7 +155,7 @@ internal class SaveStateMutator(
 
     fun <T> mutateWithResult(transform: (SaveData) -> Pair<SaveData, T>): T = synchronized(this) {
         val (next, result) = transform(state)
-        if (next != state) {
+        if (writable && next != state) {
             state = next
             persist(next)
         }

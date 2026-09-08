@@ -75,7 +75,10 @@ class ThemeContrastTest {
         assertFalse(shared.contains("Loom.Moss"))
         assertFalse(puzzle.contains("Loom.Moss"))
         assertFalse(navigation.contains("Loom.Moss"))
-        assertFalse("Primary action must not use the low-contrast decorative coral", shared.contains("container: Color = Loom.Coral"))
+        assertFalse(
+            "Primary action must not use the low-contrast decorative coral",
+            Regex("""container:\s*Color\s*=\s*Loom\.Coral\s*[,)]""").containsMatchIn(shared)
+        )
         assertFalse("Puzzle small labels must not use decorative coral as text", puzzle.contains("color = Loom.Coral"))
     }
 
@@ -88,23 +91,20 @@ class ThemeContrastTest {
     private fun relativeLuminance(color: Color): Double {
         fun linear(component: Float): Double {
             val c = component.toDouble()
-            return if (c <= 0.04045) c / 12.92
-            else Math.pow((c + 0.055) / 1.055, 2.4)
+            return if (c <= 0.04045) c / 12.92 else Math.pow((c + 0.055) / 1.055, 2.4)
         }
-
         return 0.2126 * linear(color.red) +
             0.7152 * linear(color.green) +
             0.0722 * linear(color.blue)
     }
 
-    private fun repoFile(relative: String): File {
-        var current: File? = File(System.getProperty("user.dir")).absoluteFile
+    private fun repoFile(path: String): File {
+        var dir = File(System.getProperty("user.dir"))
         repeat(8) {
-            val base = current ?: return@repeat
-            val candidate = File(base, relative)
-            if (candidate.isFile) return candidate
-            current = base.parentFile
+            val candidate = File(dir, path)
+            if (candidate.exists()) return candidate
+            dir = dir.parentFile ?: return@repeat
         }
-        error("Could not locate repository file: $relative from ${System.getProperty("user.dir")}")
+        error("Could not resolve repository file: $path")
     }
 }

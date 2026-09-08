@@ -17,15 +17,17 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material.icons.rounded.LocalFlorist
 import androidx.compose.material.icons.rounded.WaterDrop
-import androidx.compose.material.icons.rounded.Cloud
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -35,6 +37,8 @@ import com.rork.weatherloom.ui.board.SpecimenBadge
 import com.rork.weatherloom.ui.board.TerrariumScene
 import com.rork.weatherloom.ui.components.LoomButton
 import com.rork.weatherloom.ui.components.StatPill
+import com.rork.weatherloom.ui.terrarium.TerrariumRenderPolicy
+import com.rork.weatherloom.ui.terrarium.TerrariumVisualSnapshot
 import com.rork.weatherloom.ui.theme.Loom
 
 /** Home: the keepsake that grew out of every sky you have woven. */
@@ -46,11 +50,16 @@ fun TerrariumScreen(
     continueLevel: Level?,
     lastCollectible: Collectible?,
     phase: Float,
-    reducedMotion: Boolean,
+    visualSnapshot: TerrariumVisualSnapshot,
+    renderPolicy: TerrariumRenderPolicy,
     contentPadding: PaddingValues,
     onContinue: () -> Unit,
     onOpenAlmanac: () -> Unit
 ) {
+    val stateIndicators = renderPolicy.stateIndicators
+    val stateDescription = "Terrarium state: " +
+        stateIndicators.ifEmpty { listOf("calm") }.joinToString(", ")
+
     Column(
         Modifier
             .fillMaxSize()
@@ -60,13 +69,36 @@ fun TerrariumScreen(
             Modifier
                 .weight(1f)
                 .fillMaxWidth()
+                .semantics { contentDescription = stateDescription }
         ) {
             TerrariumScene(
-                unlocked = unlocked.map { it.id },
+                snapshot = visualSnapshot,
+                renderPolicy = renderPolicy,
                 phase = phase,
-                reducedMotion = reducedMotion,
                 modifier = Modifier.fillMaxSize()
             )
+
+            if (stateIndicators.isNotEmpty()) {
+                Surface(
+                    shape = RoundedCornerShape(16.dp),
+                    color = Loom.Surface.copy(alpha = 0.92f),
+                    border = BorderStroke(1.dp, Loom.Outline),
+                    modifier = Modifier
+                        .align(Alignment.TopCenter)
+                        .padding(horizontal = 16.dp, vertical = 10.dp)
+                ) {
+                    Text(
+                        text = stateIndicators.joinToString("  •  "),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = Loom.Ink,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
+                    )
+                }
+            }
+
             Row(
                 Modifier
                     .align(Alignment.BottomCenter)

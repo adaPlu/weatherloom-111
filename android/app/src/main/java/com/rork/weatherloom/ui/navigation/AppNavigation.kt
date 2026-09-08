@@ -106,8 +106,8 @@ fun AppNavigation() {
                             colors = NavigationBarItemDefaults.colors(
                                 selectedIconColor = Loom.Ink,
                                 selectedTextColor = Loom.Ink,
-                                unselectedIconColor = Loom.Moss,
-                                unselectedTextColor = Loom.Moss,
+                                unselectedIconColor = Loom.TextMuted,
+                                unselectedTextColor = Loom.TextMuted,
                                 indicatorColor = Loom.SurfaceSunk
                             )
                         )

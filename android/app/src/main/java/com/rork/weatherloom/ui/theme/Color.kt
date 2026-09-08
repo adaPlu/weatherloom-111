@@ -8,6 +8,8 @@ object Loom {
     val Surface = Color(0xFFFDFBF4)
     val SurfaceSunk = Color(0xFFEFE8DA)
     val Ink = Color(0xFF2B3A36)
+
+    // Decorative felt hues. Keep these for art, fills, ribbons, and non-text accents.
     val Moss = Color(0xFF7A8B7F)
     val Coral = Color(0xFFE2694F)
     val CoralSoft = Color(0xFFF6DCD3)
@@ -17,6 +19,22 @@ object Loom {
     val WindInk = Color(0xFF8A7F63)
     val Moisture = Color(0xFF5FA8A0)
     val MoistureSoft = Color(0xFFD6EAE7)
+
+    // Accessible semantic hues for small text and foreground actions on warm surfaces.
+    // Each text value is >= 4.5:1 against Canvas, Surface, and SurfaceSunk.
+    val TextMuted = Color(0xFF52635A)
+    val TextAccent = Color(0xFFAC3E2C)
+    val TextCold = Color(0xFF356C85)
+    val TextMoisture = Color(0xFF316B64)
+
+    // Strong containers support small light text at >= 4.5:1 while preserving hue families.
+    val CoralStrong = TextAccent
+    val ColdStrong = TextCold
+    val MoistureStrong = TextMoisture
+    val WindStrong = Color(0xFF665C43)
+    val OchreStrong = Color(0xFF765612)
+    val PurpleStrong = Color(0xFF65528D)
+
     val Meadow = Color(0xFF9DBB8A)
     val Fog = Color(0xFFC9C3D6)
     val Outline = Color(0xFFE0D7C4)

@@ -106,7 +106,7 @@ fun LevelsScreen(
                         Text(
                             chapter.subtitle,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Loom.Moss
+                            color = Loom.TextMuted
                         )
                     }
                 }
@@ -151,7 +151,7 @@ private fun LevelCard(entry: LevelEntry, onOpen: (Level) -> Unit) {
                         Icon(
                             Icons.Rounded.Lock,
                             contentDescription = "Locked",
-                            tint = Loom.Moss,
+                            tint = Loom.TextMuted,
                             modifier = Modifier.size(20.dp)
                         )
                     }
@@ -162,13 +162,13 @@ private fun LevelCard(entry: LevelEntry, onOpen: (Level) -> Unit) {
                 Text(
                     level.name,
                     style = MaterialTheme.typography.titleMedium,
-                    color = if (entry.unlocked) Loom.Ink else Loom.Moss
+                    color = if (entry.unlocked) Loom.Ink else Loom.TextMuted
                 )
                 Spacer(Modifier.height(2.dp))
                 Text(
                     if (entry.unlocked) level.brief else "Settle the hollow before this one.",
                     style = MaterialTheme.typography.bodySmall,
-                    color = Loom.Moss,
+                    color = Loom.TextMuted,
                     maxLines = 2
                 )
                 Spacer(Modifier.height(6.dp))
@@ -181,7 +181,7 @@ private fun LevelCard(entry: LevelEntry, onOpen: (Level) -> Unit) {
                             Text(
                                 spec.label,
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Loom.Moss,
+                                color = Loom.TextMuted,
                                 modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
                             )
                         }
@@ -255,10 +255,10 @@ private fun LevelThumb(level: Level, unlocked: Boolean) {
 }
 
 private fun chapterTint(index: Int): Color = when (index) {
-    1 -> Loom.Coral
-    2 -> Loom.WindInk
-    3 -> Loom.Cold
-    4 -> Color(0xFFB58A3E)
-    5 -> Loom.Moisture
-    else -> Color(0xFF8A76B4)
+    1 -> Loom.CoralStrong
+    2 -> Loom.WindStrong
+    3 -> Loom.ColdStrong
+    4 -> Loom.OchreStrong
+    5 -> Loom.MoistureStrong
+    else -> Loom.PurpleStrong
 }

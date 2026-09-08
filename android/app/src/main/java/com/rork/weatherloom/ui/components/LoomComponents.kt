@@ -127,7 +127,7 @@ fun ObjectiveChip(progress: ObjectiveProgress, modifier: Modifier = Modifier) {
             Text(
                 progress.spec.label,
                 style = MaterialTheme.typography.labelMedium,
-                color = Loom.Moss
+                color = Loom.TextMuted
             )
             Text(
                 shown,
@@ -240,7 +240,7 @@ private fun Medallion(label: String, tier: Rating, earned: Rating) {
         Text(
             label,
             style = MaterialTheme.typography.labelSmall,
-            color = if (isExact) Loom.Ink else Loom.Moss
+            color = if (isExact) Loom.Ink else Loom.TextMuted
         )
     }
 }
@@ -308,7 +308,7 @@ fun LoomButton(
     modifier: Modifier = Modifier,
     icon: ImageVector? = null,
     enabled: Boolean = true,
-    container: Color = Loom.Coral,
+    container: Color = Loom.CoralStrong,
     contentColor: Color = Loom.Surface
 ) {
     val interaction = remember { MutableInteractionSource() }
@@ -324,7 +324,7 @@ fun LoomButton(
         enabled = enabled,
         shape = RoundedCornerShape(18.dp),
         color = if (enabled) container else Color(0xFFE6DFD1),
-        contentColor = if (enabled) contentColor else Loom.Moss,
+        contentColor = if (enabled) contentColor else Loom.TextMuted,
         interactionSource = interaction,
         shadowElevation = if (enabled) 2.dp else 0.dp
     ) {
@@ -350,7 +350,7 @@ fun SectionHeading(title: String, subtitle: String? = null, modifier: Modifier =
         Text(title, style = MaterialTheme.typography.headlineSmall, color = Loom.Ink)
         if (subtitle != null) {
             Spacer(Modifier.height(3.dp))
-            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = Loom.Moss)
+            Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = Loom.TextMuted)
         }
     }
 }

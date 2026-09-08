@@ -113,14 +113,14 @@ fun PuzzleDrawScreen(
                         Icon(
                             Icons.Rounded.Thermostat,
                             contentDescription = "Show air temperature",
-                            tint = if (ui.showTemperature) Loom.Coral else Loom.Moss
+                            tint = if (ui.showTemperature) Loom.TextAccent else Loom.TextMuted
                         )
                     }
                     IconButton(onClick = onHint) {
                         Icon(
                             Icons.Rounded.Lightbulb,
                             contentDescription = "Hint",
-                            tint = if (ui.hintShown) Loom.Coral else Loom.Moss
+                            tint = if (ui.hintShown) Loom.TextAccent else Loom.TextMuted
                         )
                     }
                 },
@@ -166,7 +166,7 @@ fun PuzzleDrawScreen(
                                 Text(
                                     "Weave it for me",
                                     style = MaterialTheme.typography.labelMedium,
-                                    color = Loom.Coral
+                                    color = Loom.TextAccent
                                 )
                             }
                         }
@@ -270,12 +270,12 @@ private fun ThreadPalette(ui: PuzzleUiState, onArm: (ThreadType) -> Unit) {
                     Text(
                         type.shortLabel,
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (left > 0) Loom.Ink else Loom.Moss
+                        color = if (left > 0) Loom.Ink else Loom.TextMuted
                     )
                     Text(
                         "×$left",
                         style = MaterialTheme.typography.labelMedium,
-                        color = if (left > 0) Loom.Moss else Loom.Outline
+                        color = if (left > 0) Loom.TextMuted else Loom.Outline
                     )
                 }
             }
@@ -355,7 +355,7 @@ fun ThreadRuleRow(type: ThreadType, modifier: Modifier = Modifier) {
         ThreadGlyph(type, type.ribbonColor(), 18)
         Column {
             Text(type.label, style = MaterialTheme.typography.labelMedium, color = Loom.Ink)
-            Text(type.rule, style = MaterialTheme.typography.bodySmall, color = Loom.Moss)
+            Text(type.rule, style = MaterialTheme.typography.bodySmall, color = Loom.TextMuted)
         }
     }
 }

@@ -99,7 +99,7 @@ fun ResultSheet(
             Text(
                 text = subVerdict(level, result),
                 style = MaterialTheme.typography.bodyMedium,
-                color = Loom.Moss,
+                color = Loom.TextMuted,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -142,7 +142,7 @@ fun ResultSheet(
                             Text(
                                 reward.flavour,
                                 style = MaterialTheme.typography.bodySmall,
-                                color = Loom.Moss
+                                color = Loom.TextMuted
                             )
                         }
                     }

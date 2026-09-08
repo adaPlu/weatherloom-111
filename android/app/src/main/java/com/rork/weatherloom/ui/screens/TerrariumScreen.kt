@@ -147,7 +147,7 @@ fun TerrariumScreen(
                     text = lastCollectible?.let { "${it.name} joined your terrarium" }
                         ?: "Nothing has taken root yet",
                     style = MaterialTheme.typography.bodyLarge,
-                    color = Loom.Moss
+                    color = Loom.TextMuted
                 )
             }
 
@@ -171,7 +171,7 @@ fun TerrariumScreen(
                     Text(
                         "Solve a hollow and the first species will settle under the glass.",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = Loom.Moss,
+                        color = Loom.TextMuted,
                         modifier = Modifier.padding(16.dp)
                     )
                 }

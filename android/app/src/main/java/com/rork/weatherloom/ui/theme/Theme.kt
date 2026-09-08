@@ -5,15 +5,15 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 
 private val LoomColorScheme = lightColorScheme(
-    primary = Loom.Coral,
+    primary = Loom.CoralStrong,
     onPrimary = Loom.Surface,
     primaryContainer = Loom.CoralSoft,
     onPrimaryContainer = Loom.Ink,
-    secondary = Loom.Cold,
+    secondary = Loom.ColdStrong,
     onSecondary = Loom.Surface,
     secondaryContainer = Loom.ColdSoft,
     onSecondaryContainer = Loom.Ink,
-    tertiary = Loom.Moisture,
+    tertiary = Loom.MoistureStrong,
     onTertiary = Loom.Surface,
     tertiaryContainer = Loom.MoistureSoft,
     onTertiaryContainer = Loom.Ink,
@@ -22,7 +22,7 @@ private val LoomColorScheme = lightColorScheme(
     surface = Loom.Canvas,
     onSurface = Loom.Ink,
     surfaceVariant = Loom.SurfaceSunk,
-    onSurfaceVariant = Loom.Moss,
+    onSurfaceVariant = Loom.TextMuted,
     surfaceContainer = Loom.Surface,
     surfaceContainerHigh = Loom.Surface,
     surfaceContainerHighest = Loom.Surface,
@@ -30,14 +30,44 @@ private val LoomColorScheme = lightColorScheme(
     surfaceContainerLowest = Loom.Surface,
     outline = Loom.Outline,
     outlineVariant = Loom.Outline,
-    error = Loom.Coral,
+    error = Loom.CoralStrong,
+    onError = Loom.Surface
+)
+
+private val HighContrastLoomColorScheme = lightColorScheme(
+    primary = Loom.Ink,
+    onPrimary = Loom.Surface,
+    primaryContainer = Loom.CoralSoft,
+    onPrimaryContainer = Loom.Ink,
+    secondary = Loom.TextCold,
+    onSecondary = Loom.Surface,
+    secondaryContainer = Loom.ColdSoft,
+    onSecondaryContainer = Loom.Ink,
+    tertiary = Loom.TextMoisture,
+    onTertiary = Loom.Surface,
+    tertiaryContainer = Loom.MoistureSoft,
+    onTertiaryContainer = Loom.Ink,
+    background = Loom.Canvas,
+    onBackground = Loom.Ink,
+    surface = Loom.Surface,
+    onSurface = Loom.Ink,
+    surfaceVariant = Loom.SurfaceSunk,
+    onSurfaceVariant = Loom.Ink,
+    surfaceContainer = Loom.Surface,
+    surfaceContainerHigh = Loom.SurfaceSunk,
+    surfaceContainerHighest = Loom.SurfaceSunk,
+    surfaceContainerLow = Loom.Canvas,
+    surfaceContainerLowest = Loom.Surface,
+    outline = Loom.Ink,
+    outlineVariant = Loom.TextMuted,
+    error = Loom.TextAccent,
     onError = Loom.Surface
 )
 
 @Composable
-fun AppTheme(content: @Composable () -> Unit) {
+fun AppTheme(highContrast: Boolean = false, content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = LoomColorScheme,
+        colorScheme = if (highContrast) HighContrastLoomColorScheme else LoomColorScheme,
         typography = LoomTypography,
         content = content
     )

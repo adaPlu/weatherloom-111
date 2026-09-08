@@ -24,7 +24,7 @@ internal data class SaveLoadResult(
  */
 object SaveMigration {
 
-    fun load(raw: String?, json: Json): SaveLoadResult {
+    internal fun load(raw: String?, json: Json): SaveLoadResult {
         if (raw.isNullOrBlank()) return SaveLoadResult(SaveData())
 
         return runCatching { decodeParsed(raw, json) }

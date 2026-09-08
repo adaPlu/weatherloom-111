@@ -77,6 +77,24 @@ class GrowthPulseAdversarialTest {
         assertEquals(GrowthStage.Bloom, profile.stages[result.single().stageIndex])
     }
 
+    @Test
+    fun terminalBloomIgnoresFutureRelevantEchoesWithoutGrowingHistory() {
+        val terminal = GrowthState(
+            instanceId = "rainbell-001",
+            growthProfileId = "botanical",
+            stageIndex = profile.stages.lastIndex,
+            growthPulsesApplied = 2,
+            lastRelevantEchoId = "echo-b",
+            appliedEchoIds = listOf("echo-a", "echo-b")
+        )
+
+        val afterManyEchoes = (1..100).fold(listOf(terminal)) { state, index ->
+            service.apply(layout, state, rain("future-echo-$index"))
+        }
+
+        assertEquals(listOf(terminal), afterManyEchoes)
+    }
+
     private fun rain(id: String) = WeatherEchoSnapshot(
         id = id,
         kinds = listOf(WeatherEchoKind.Rain),

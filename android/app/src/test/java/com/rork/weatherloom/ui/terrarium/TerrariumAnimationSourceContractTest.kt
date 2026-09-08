@@ -66,6 +66,18 @@ class TerrariumAnimationSourceContractTest {
     }
 
     @Test
+    fun `Terrarium state indicators do not truncate equivalent static state`() {
+        val source = repoFile("android/app/src/main/java/com/rork/weatherloom/ui/screens/TerrariumScreen.kt").readText()
+        val marker = "text = stateIndicators.joinToString"
+        val start = source.indexOf(marker)
+
+        assertTrue("visible Terrarium state indicators are required", start >= 0)
+        val indicatorBlock = source.substring(start, minOf(source.length, start + 700))
+        assertFalse("state indicators must not be capped to a fixed line count", indicatorBlock.contains("maxLines ="))
+        assertFalse("state indicators must not hide state behind ellipsis", indicatorBlock.contains("TextOverflow.Ellipsis"))
+    }
+
+    @Test
     fun `scene receives deterministic snapshot and animation policy instead of authoring state`() {
         val source = repoFile("android/app/src/main/java/com/rork/weatherloom/ui/board/TerrariumScene.kt").readText()
 

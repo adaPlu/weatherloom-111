@@ -1,6 +1,8 @@
 package com.rork.weatherloom.data
 
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -189,6 +191,46 @@ class SaveMigrationTest {
         assertEquals(99, decoded.schema)
         assertEquals(listOf("rainbell"), decoded.collectibles)
         assertTrue(decoded.tutorialSeen)
+    }
+
+    @Test
+    fun futureSchemaMutationCannotOverwriteUnknownNestedState() {
+        val raw = """
+            {
+              "schema": 99,
+              "collectibles": ["rainbell"],
+              "tutorialSeen": true,
+              "unknownFutureState": {
+                "nested": {
+                  "token": "keep-me"
+                }
+              }
+            }
+        """.trimIndent()
+        val decoded = SaveMigration.decode(raw, json)
+        var persistedRaw = raw
+        var writes = 0
+        val mutator = SaveStateMutator(decoded) { next ->
+            writes++
+            persistedRaw = json.encodeToString(SaveData.serializer(), next)
+        }
+
+        val afterMutationAttempt = mutator.mutate { current ->
+            current.copy(tutorialSeen = false)
+        }
+
+        assertEquals(decoded, afterMutationAttempt)
+        assertEquals(0, writes)
+        val persisted = json.parseToJsonElement(persistedRaw).jsonObject
+        assertEquals(99, persisted.getValue("schema").jsonPrimitive.content.toInt())
+        assertEquals(
+            "keep-me",
+            persisted.getValue("unknownFutureState")
+                .jsonObject.getValue("nested")
+                .jsonObject.getValue("token")
+                .jsonPrimitive.content
+        )
+        assertTrue(persisted.getValue("tutorialSeen").jsonPrimitive.content.toBoolean())
     }
 
     @Test

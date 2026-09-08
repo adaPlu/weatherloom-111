@@ -153,10 +153,10 @@ object SaveMigration {
 /**
  * Serializes all read-modify-write save mutations behind one lock. This prevents
  * two concurrent callers from reading the same old snapshot and losing one update.
- * The persistence callback is invoked only when the resulting state actually changes.
+ * Changed state becomes authoritative only after the persistence callback succeeds.
  *
  * Saves written by a newer schema or quarantined after corrupt decoding remain read-only
- * until an explicit [recover] action replaces them with a current-schema save.
+ * until an explicit [recover] action durably replaces them with a current-schema save.
  */
 internal class SaveStateMutator(
     initial: SaveData,
@@ -172,20 +172,28 @@ internal class SaveStateMutator(
     fun mutate(transform: (SaveData) -> SaveData): SaveData = synchronized(this) {
         if (!writable) return@synchronized state
 
-        val next = transform(state)
-        if (next != state) {
+        val current = state
+        val next = transform(current)
+        if (next == current) return@synchronized current
+
+        if (runCatching { persist(next) }.isSuccess) {
             state = next
-            persist(next)
         }
         state
     }
 
-    fun <T> mutateWithResult(transform: (SaveData) -> Pair<SaveData, T>): T = synchronized(this) {
-        val (next, result) = transform(state)
-        if (writable && next != state) {
-            state = next
-            persist(next)
+    fun <T : Any> mutateWithResult(
+        transform: (SaveData) -> Pair<SaveData, T>
+    ): T? = synchronized(this) {
+        val current = state
+        val (next, result) = transform(current)
+        if (next == current) return@synchronized result
+        if (!writable) return@synchronized null
+
+        if (runCatching { persist(next) }.isFailure) {
+            return@synchronized null
         }
+        state = next
         result
     }
 
@@ -193,9 +201,11 @@ internal class SaveStateMutator(
         require(replacement.schema <= CURRENT_SAVE_SCHEMA) {
             "Recovery replacement must be understood by this save schema"
         }
+        if (runCatching { persist(replacement) }.isFailure) {
+            return@synchronized state
+        }
         state = replacement
         writable = true
-        persist(replacement)
         state
     }
 }

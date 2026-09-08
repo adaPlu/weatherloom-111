@@ -27,10 +27,13 @@ object Loom {
     val TextCold = Color(0xFF356C85)
     val TextMoisture = Color(0xFF316B64)
 
-    // Strong action containers support small light text at >= 4.5:1.
+    // Strong containers support small light text at >= 4.5:1 while preserving hue families.
     val CoralStrong = TextAccent
     val ColdStrong = TextCold
     val MoistureStrong = TextMoisture
+    val WindStrong = Color(0xFF665C43)
+    val OchreStrong = Color(0xFF765612)
+    val PurpleStrong = Color(0xFF65528D)
 
     val Meadow = Color(0xFF9DBB8A)
     val Fog = Color(0xFFC9C3D6)

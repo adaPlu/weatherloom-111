@@ -88,10 +88,12 @@ class GameRepository private constructor(context: Context) {
     )
 
     private fun persist(data: SaveData) {
-        _save.value = data
-        runCatching {
-            prefs.edit().putString(KEY, json.encodeToString(SaveData.serializer(), data)).apply()
+        val encoded = json.encodeToString(SaveData.serializer(), data)
+        val committed = prefs.edit().putString(KEY, encoded).commit()
+        if (!committed) {
+            throw IllegalStateException("Save commit failed")
         }
+        _save.value = data
     }
 
     fun recordAttempt(levelId: String) {
@@ -124,7 +126,7 @@ class GameRepository private constructor(context: Context) {
                 weatherEcho = weatherEcho
             )
             result.save to result.newlyUnlockedCollectible
-        }
+        } ?: false
 
     /**
      * Recomputes ephemeral Terrarium reactions and applies any new durable event IDs through
@@ -134,7 +136,7 @@ class GameRepository private constructor(context: Context) {
         mutator.mutateWithResult { current ->
             val result = terrariumReactionSaveService.evaluateAndApply(current)
             result.save to result.reactions
-        }
+        } ?: ReactionResult()
 
     fun recordDaily(dayKey: String) {
         mutator.mutate { current ->

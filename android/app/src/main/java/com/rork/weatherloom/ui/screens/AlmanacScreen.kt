@@ -30,8 +30,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.rork.weatherloom.core.level.Collectible
 import com.rork.weatherloom.core.sim.ThreadType
+import com.rork.weatherloom.ui.almanac.AlmanacContent
+import com.rork.weatherloom.ui.almanac.AlmanacEntryViewData
+import com.rork.weatherloom.ui.almanac.AlmanacSection
 import com.rork.weatherloom.ui.board.SpecimenBadge
 import com.rork.weatherloom.ui.board.ribbonColor
 import com.rork.weatherloom.ui.components.SectionHeading
@@ -41,8 +43,7 @@ import com.rork.weatherloom.ui.theme.Loom
 /** The collection, the rulebook, and the accessibility switches, in one quiet ledger. */
 @Composable
 fun AlmanacScreen(
-    collectibles: List<Collectible>,
-    discovered: Set<String>,
+    content: AlmanacContent,
     reducedMotion: Boolean,
     musicEnabled: Boolean,
     soundEnabled: Boolean,
@@ -52,6 +53,8 @@ fun AlmanacScreen(
     onMusicEnabled: (Boolean) -> Unit,
     onSoundEnabled: (Boolean) -> Unit
 ) {
+    val speciesDiscovered = content.species.count { it.discovered }
+
     LazyColumn(
         Modifier
             .fillMaxSize()
@@ -67,73 +70,44 @@ fun AlmanacScreen(
         item {
             SectionHeading(
                 "Almanac",
-                "${discovered.size} of ${collectibles.size} species recorded."
+                "$speciesDiscovered of ${content.species.size} species recorded."
+            )
+            Spacer(Modifier.height(12.dp))
+            SectionHeading(
+                AlmanacSection.Species.label,
+                AlmanacSection.Species.subtitle
             )
             Spacer(Modifier.height(6.dp))
         }
 
-        items(collectibles, key = { it.id }) { c ->
-            val found = c.id in discovered
-            Surface(
-                shape = RoundedCornerShape(22.dp),
-                color = if (found) Loom.Surface else Color(0xFFEFEADE),
-                border = BorderStroke(1.dp, Loom.Outline),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Row(
-                    Modifier.padding(14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        Modifier.size(72.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (found) {
-                            SpecimenBadge(c.id, Modifier.size(72.dp), phase)
-                        } else {
-                            Box(
-                                Modifier
-                                    .size(72.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Loom.SurfaceSunk),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    Icons.Rounded.HelpOutline,
-                                    contentDescription = null,
-                                    tint = Loom.Outline,
-                                    modifier = Modifier.size(28.dp)
-                                )
-                            }
-                        }
-                    }
-                    Spacer(Modifier.size(14.dp))
-                    Column(Modifier.weight(1f)) {
-                        Text(
-                            if (found) c.name else "Undiscovered",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = if (found) Loom.Ink else Loom.Moss
-                        )
-                        Spacer(Modifier.height(3.dp))
-                        Text(
-                            if (found) c.flavour else c.unlock,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Loom.Moss
-                        )
-                        if (found) {
-                            Spacer(Modifier.height(6.dp))
-                            Surface(shape = RoundedCornerShape(50), color = Loom.SurfaceSunk) {
-                                Text(
-                                    c.biome,
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = Loom.Moss,
-                                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp)
-                                )
-                            }
-                        }
-                    }
-                }
-            }
+        items(content.species, key = { "species:${it.id}" }) { entry ->
+            SpeciesEntryCard(entry = entry, phase = phase)
+        }
+
+        item {
+            Spacer(Modifier.height(14.dp))
+            SectionHeading(
+                AlmanacSection.Weather.label,
+                AlmanacSection.Weather.subtitle
+            )
+            Spacer(Modifier.height(6.dp))
+        }
+
+        items(content.weather, key = { "weather:${it.id}" }) { entry ->
+            AlmanacTextEntryCard(entry)
+        }
+
+        item {
+            Spacer(Modifier.height(14.dp))
+            SectionHeading(
+                AlmanacSection.Discoveries.label,
+                AlmanacSection.Discoveries.subtitle
+            )
+            Spacer(Modifier.height(6.dp))
+        }
+
+        items(content.discoveries, key = { "discovery:${it.id}" }) { entry ->
+            AlmanacTextEntryCard(entry)
         }
 
         item {
@@ -243,6 +217,109 @@ fun AlmanacScreen(
                         onCheckedChange = onSoundEnabled
                     )
                 }
+            }
+        }
+    }
+}
+
+@Composable
+private fun SpeciesEntryCard(entry: AlmanacEntryViewData, phase: Float) {
+    Surface(
+        shape = RoundedCornerShape(22.dp),
+        color = if (entry.discovered) Loom.Surface else Color(0xFFEFEADE),
+        border = BorderStroke(1.dp, Loom.Outline),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            Modifier.padding(14.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                Modifier.size(72.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                if (entry.discovered) {
+                    SpecimenBadge(entry.id, Modifier.size(72.dp), phase)
+                } else {
+                    Box(
+                        Modifier
+                            .size(72.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Loom.SurfaceSunk),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Rounded.HelpOutline,
+                            contentDescription = "Undiscovered Almanac entry",
+                            tint = Loom.Outline,
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
+                }
+            }
+            Spacer(Modifier.size(14.dp))
+            AlmanacEntryText(entry, Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun AlmanacTextEntryCard(entry: AlmanacEntryViewData) {
+    Surface(
+        shape = RoundedCornerShape(22.dp),
+        color = if (entry.discovered) Loom.Surface else Color(0xFFEFEADE),
+        border = BorderStroke(1.dp, Loom.Outline),
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            Modifier.padding(16.dp),
+            verticalAlignment = Alignment.Top
+        ) {
+            if (!entry.discovered) {
+                Icon(
+                    Icons.Rounded.HelpOutline,
+                    contentDescription = "Undiscovered Almanac entry",
+                    tint = Loom.Outline,
+                    modifier = Modifier.size(24.dp)
+                )
+                Spacer(Modifier.size(10.dp))
+            }
+            AlmanacEntryText(entry, Modifier.weight(1f))
+        }
+    }
+}
+
+@Composable
+private fun AlmanacEntryText(entry: AlmanacEntryViewData, modifier: Modifier = Modifier) {
+    Column(modifier) {
+        Text(
+            entry.title,
+            style = MaterialTheme.typography.titleMedium,
+            color = if (entry.discovered) Loom.Ink else Loom.Moss
+        )
+        Spacer(Modifier.height(3.dp))
+        Text(
+            entry.body,
+            style = MaterialTheme.typography.bodySmall,
+            color = Loom.Moss
+        )
+        entry.clue?.let { clue ->
+            Spacer(Modifier.height(5.dp))
+            Text(
+                "Clue: $clue",
+                style = MaterialTheme.typography.bodySmall,
+                color = Loom.Ink
+            )
+        }
+        entry.label?.let { label ->
+            Spacer(Modifier.height(6.dp))
+            Surface(shape = RoundedCornerShape(50), color = Loom.SurfaceSunk) {
+                Text(
+                    label,
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Loom.Moss,
+                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp)
+                )
             }
         }
     }

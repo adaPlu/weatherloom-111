@@ -38,6 +38,7 @@ import com.rork.weatherloom.audio.Sfx
 import com.rork.weatherloom.core.level.DailyForecast
 import com.rork.weatherloom.core.level.LevelLibrary
 import com.rork.weatherloom.data.GameRepository
+import com.rork.weatherloom.ui.almanac.AlmanacProjection
 import com.rork.weatherloom.ui.components.rememberLoomPhase
 import com.rork.weatherloom.ui.puzzle.PuzzleRoute
 import com.rork.weatherloom.ui.screens.AlmanacScreen
@@ -179,9 +180,15 @@ fun AppNavigation() {
             }
 
             composable(Tab.Almanac.route) {
-                AlmanacScreen(
+                val content = AlmanacProjection.project(
                     collectibles = LevelLibrary.collectibles,
-                    discovered = save.collectibles.toSet(),
+                    speciesDiscovered = save.collectibles.toSet(),
+                    terrariumCatalog = repo.terrariumCatalogSnapshot(),
+                    weatherEcho = save.terrariumEnvironment?.weatherEcho,
+                    terrariumDiscoveries = save.terrariumDiscoveries.toSet()
+                )
+                AlmanacScreen(
+                    content = content,
                     reducedMotion = save.reducedMotion,
                     musicEnabled = save.musicEnabled,
                     soundEnabled = save.soundEnabled,

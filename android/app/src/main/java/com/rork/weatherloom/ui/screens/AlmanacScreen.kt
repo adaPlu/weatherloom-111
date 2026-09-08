@@ -45,11 +45,13 @@ import com.rork.weatherloom.ui.theme.Loom
 fun AlmanacScreen(
     content: AlmanacContent,
     reducedMotion: Boolean,
+    highContrast: Boolean,
     musicEnabled: Boolean,
     soundEnabled: Boolean,
     contentPadding: PaddingValues,
     phase: Float,
     onReducedMotion: (Boolean) -> Unit,
+    onHighContrast: (Boolean) -> Unit,
     onMusicEnabled: (Boolean) -> Unit,
     onSoundEnabled: (Boolean) -> Unit
 ) {
@@ -149,7 +151,7 @@ fun AlmanacScreen(
                                 Text(
                                     type.rule,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Loom.Moss
+                                    color = Loom.TextMuted
                                 )
                             }
                         }
@@ -203,6 +205,12 @@ fun AlmanacScreen(
                         detail = "Stills the drifting clouds and swaying reeds. The simulation is unchanged.",
                         checked = reducedMotion,
                         onCheckedChange = onReducedMotion
+                    )
+                    ComfortSwitch(
+                        title = "High contrast",
+                        detail = "Strengthens text, controls and key surfaces while keeping the woven palette.",
+                        checked = highContrast,
+                        onCheckedChange = onHighContrast
                     )
                     ComfortSwitch(
                         title = "Music",
@@ -295,13 +303,13 @@ private fun AlmanacEntryText(entry: AlmanacEntryViewData, modifier: Modifier = M
         Text(
             entry.title,
             style = MaterialTheme.typography.titleMedium,
-            color = if (entry.discovered) Loom.Ink else Loom.Moss
+            color = if (entry.discovered) Loom.Ink else Loom.TextMuted
         )
         Spacer(Modifier.height(3.dp))
         Text(
             entry.body,
             style = MaterialTheme.typography.bodySmall,
-            color = Loom.Moss
+            color = Loom.TextMuted
         )
         entry.clue?.let { clue ->
             Spacer(Modifier.height(5.dp))
@@ -317,7 +325,7 @@ private fun AlmanacEntryText(entry: AlmanacEntryViewData, modifier: Modifier = M
                 Text(
                     label,
                     style = MaterialTheme.typography.labelSmall,
-                    color = Loom.Moss,
+                    color = Loom.TextMuted,
                     modifier = Modifier.padding(horizontal = 9.dp, vertical = 3.dp)
                 )
             }
@@ -338,7 +346,7 @@ private fun ComfortSwitch(
     ) {
         Column(Modifier.weight(1f)) {
             Text(title, style = MaterialTheme.typography.titleMedium, color = Loom.Ink)
-            Text(detail, style = MaterialTheme.typography.bodySmall, color = Loom.Moss)
+            Text(detail, style = MaterialTheme.typography.bodySmall, color = Loom.TextMuted)
         }
         Spacer(Modifier.size(12.dp))
         Switch(
@@ -346,7 +354,7 @@ private fun ComfortSwitch(
             onCheckedChange = onCheckedChange,
             colors = SwitchDefaults.colors(
                 checkedThumbColor = Loom.Surface,
-                checkedTrackColor = Loom.Moisture,
+                checkedTrackColor = Loom.MoistureStrong,
                 uncheckedThumbColor = Loom.Surface,
                 uncheckedTrackColor = Loom.Outline
             )

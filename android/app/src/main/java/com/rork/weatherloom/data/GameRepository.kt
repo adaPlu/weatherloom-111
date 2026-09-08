@@ -164,6 +164,9 @@ class GameRepository private constructor(context: Context) {
 
     // ------------------------------------------------------------ derived data
 
+    /** Static authored Terrarium metadata for read-only presentation/query projections. */
+    fun terrariumCatalogSnapshot(): TerrariumCatalog = terrariumCatalog
+
     fun ratingOf(levelId: String): Rating = _save.value.levels[levelId]?.ratingEnum ?: Rating.None
 
     fun isSolved(levelId: String): Boolean = ratingOf(levelId) != Rating.None

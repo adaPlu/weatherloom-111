@@ -5,6 +5,7 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
+// RED contract: this file intentionally lands before Feature 13 production implementation.
 class AlmanacScreenContractTest {
 
     @Test

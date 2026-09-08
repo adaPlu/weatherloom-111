@@ -61,6 +61,23 @@ class ThemeContrastTest {
     }
 
     @Test
+    fun highContrastPreferenceIsExposedInComfortSettings() {
+        val almanac = repoFile(
+            "android/app/src/main/java/com/rork/weatherloom/ui/screens/AlmanacScreen.kt"
+        ).readText()
+        val navigation = repoFile(
+            "android/app/src/main/java/com/rork/weatherloom/ui/navigation/AppNavigation.kt"
+        ).readText()
+
+        assertTrue(almanac.contains("highContrast: Boolean"))
+        assertTrue(almanac.contains("onHighContrast: (Boolean) -> Unit"))
+        assertTrue(almanac.contains("title = \"High contrast\""))
+        assertTrue(almanac.contains("checked = highContrast"))
+        assertTrue(navigation.contains("highContrast = save.highContrast"))
+        assertTrue(navigation.contains("onHighContrast = repo::setHighContrast"))
+    }
+
+    @Test
     fun sharedSmallTextPathsUseAccessibleSemanticColors() {
         val shared = repoFile(
             "android/app/src/main/java/com/rork/weatherloom/ui/components/LoomComponents.kt"
@@ -80,6 +97,50 @@ class ThemeContrastTest {
             Regex("""container:\s*Color\s*=\s*Loom\.Coral\s*[,)]""").containsMatchIn(shared)
         )
         assertFalse("Puzzle small labels must not use decorative coral as text", puzzle.contains("color = Loom.Coral"))
+    }
+
+    @Test
+    fun allTextHeavyScreensAvoidRawLowContrastMossForegrounds() {
+        val paths = listOf(
+            "android/app/src/main/java/com/rork/weatherloom/ui/screens/AlmanacScreen.kt",
+            "android/app/src/main/java/com/rork/weatherloom/ui/screens/DailyScreen.kt",
+            "android/app/src/main/java/com/rork/weatherloom/ui/screens/LevelsScreen.kt",
+            "android/app/src/main/java/com/rork/weatherloom/ui/screens/TerrariumScreen.kt",
+            "android/app/src/main/java/com/rork/weatherloom/ui/puzzle/ResultSheet.kt"
+        )
+
+        paths.forEach { path ->
+            val source = repoFile(path).readText()
+            assertFalse(
+                "$path still uses decorative Loom.Moss as a foreground",
+                source.contains("Loom.Moss")
+            )
+        }
+    }
+
+    @Test
+    fun dailySmallLightTextUsesStrongContainers() {
+        val daily = repoFile(
+            "android/app/src/main/java/com/rork/weatherloom/ui/screens/DailyScreen.kt"
+        ).readText()
+
+        assertTrue(daily.contains("container = if (completedToday) Loom.MoistureStrong else Loom.CoralStrong"))
+        assertTrue(daily.contains("done -> Loom.MoistureStrong"))
+        assertFalse(daily.contains("container = if (completedToday) Loom.Moisture else Loom.Coral"))
+    }
+
+    @Test
+    fun chapterBadgesUseStrongSurfacesForSmallLightText() {
+        val levels = repoFile(
+            "android/app/src/main/java/com/rork/weatherloom/ui/screens/LevelsScreen.kt"
+        ).readText()
+
+        assertTrue(levels.contains("1 -> Loom.CoralStrong"))
+        assertTrue(levels.contains("2 -> Loom.WindStrong"))
+        assertTrue(levels.contains("3 -> Loom.ColdStrong"))
+        assertTrue(levels.contains("4 -> Loom.OchreStrong"))
+        assertTrue(levels.contains("5 -> Loom.MoistureStrong"))
+        assertTrue(levels.contains("else -> Loom.PurpleStrong"))
     }
 
     private fun contrastRatio(a: Color, b: Color): Double {

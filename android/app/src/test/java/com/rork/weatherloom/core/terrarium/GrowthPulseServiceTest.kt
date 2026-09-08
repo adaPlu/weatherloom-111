@@ -127,7 +127,7 @@ class GrowthPulseServiceTest {
     }
 
     @Test
-    fun pulsesPerStageControlsStageProgressionAndGrowthCapsAtBloom() {
+    fun pulsesPerStageControlsStageProgressionAndGrowthStateStopsAtBloom() {
         val layout = layoutOf("rainbell-1" to "rainbell")
         var states = emptyList<GrowthState>()
 
@@ -136,9 +136,12 @@ class GrowthPulseServiceTest {
         }
 
         val state = states.single()
+        val pulsesToBloom = botanical.stages.lastIndex * botanical.pulsesPerStage
         assertEquals(GrowthStage.Bloom, botanical.stages[state.stageIndex])
         assertEquals(botanical.stages.lastIndex, state.stageIndex)
-        assertEquals(10, state.growthPulsesApplied)
+        assertEquals(pulsesToBloom, state.growthPulsesApplied)
+        assertEquals(pulsesToBloom, state.appliedEchoIds.size)
+        assertEquals("rain-${pulsesToBloom - 1}", state.lastRelevantEchoId)
     }
 
     @Test

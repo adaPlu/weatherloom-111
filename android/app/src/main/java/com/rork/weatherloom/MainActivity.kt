@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.rork.weatherloom.audio.LoomAudio
 import com.rork.weatherloom.core.level.LevelLibrary
 import com.rork.weatherloom.data.GameRepository
@@ -16,11 +18,13 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         LevelLibrary.load(applicationContext)
         LoomAudio.init(applicationContext)
-        val save = GameRepository.get(applicationContext).save.value
-        LoomAudio.setSfxEnabled(save.soundEnabled)
-        LoomAudio.setMusicEnabled(save.musicEnabled)
+        val repo = GameRepository.get(applicationContext)
+        val initialSave = repo.save.value
+        LoomAudio.setSfxEnabled(initialSave.soundEnabled)
+        LoomAudio.setMusicEnabled(initialSave.musicEnabled)
         setContent {
-            AppTheme {
+            val save by repo.save.collectAsStateWithLifecycle()
+            AppTheme(highContrast = save.highContrast) {
                 AppNavigation()
             }
         }

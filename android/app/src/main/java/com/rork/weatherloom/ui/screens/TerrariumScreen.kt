@@ -92,8 +92,6 @@ fun TerrariumScreen(
                         style = MaterialTheme.typography.labelMedium,
                         color = Loom.Ink,
                         textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp)
                     )
                 }

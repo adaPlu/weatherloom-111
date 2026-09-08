@@ -38,6 +38,7 @@ import com.rork.weatherloom.audio.Sfx
 import com.rork.weatherloom.core.level.DailyForecast
 import com.rork.weatherloom.core.level.LevelLibrary
 import com.rork.weatherloom.data.GameRepository
+import com.rork.weatherloom.ui.almanac.AlmanacProjection
 import com.rork.weatherloom.ui.components.rememberLoomPhase
 import com.rork.weatherloom.ui.puzzle.PuzzleRoute
 import com.rork.weatherloom.ui.screens.AlmanacScreen
@@ -45,6 +46,8 @@ import com.rork.weatherloom.ui.screens.DailyScreen
 import com.rork.weatherloom.ui.screens.LevelEntry
 import com.rork.weatherloom.ui.screens.LevelsScreen
 import com.rork.weatherloom.ui.screens.TerrariumScreen
+import com.rork.weatherloom.ui.terrarium.TerrariumAnimationPolicy
+import com.rork.weatherloom.ui.terrarium.TerrariumVisualProjection
 import com.rork.weatherloom.ui.theme.Loom
 
 private enum class Tab(
@@ -138,6 +141,19 @@ fun AppNavigation() {
                 }
 
                 val unlocked = save.collectibles.mapNotNull { LevelLibrary.collectible(it) }
+                val terrariumCatalog = repo.terrariumCatalogSnapshot()
+                val terrariumSnapshot = TerrariumVisualProjection.project(
+                    unlockedItemIds = unlocked.map { it.id },
+                    layout = save.terrariumLayout,
+                    growthStates = save.terrariumGrowth,
+                    environment = save.terrariumEnvironment,
+                    reactions = repo.terrariumReactionSnapshot(),
+                    catalog = terrariumCatalog
+                )
+                val terrariumRenderPolicy = TerrariumAnimationPolicy.forSnapshot(
+                    snapshot = terrariumSnapshot,
+                    reducedMotion = save.reducedMotion
+                )
                 val nextId = repo.nextUnsolved()
                 TerrariumScreen(
                     unlocked = unlocked,
@@ -146,7 +162,8 @@ fun AppNavigation() {
                     continueLevel = nextId?.let { LevelLibrary.level(it) },
                     lastCollectible = save.lastCollectible?.let { LevelLibrary.collectible(it) },
                     phase = phase,
-                    reducedMotion = save.reducedMotion,
+                    visualSnapshot = terrariumSnapshot,
+                    renderPolicy = terrariumRenderPolicy,
                     contentPadding = tabPadding,
                     onContinue = { nextId?.let { navController.navigate("puzzle/$it") } },
                     onOpenAlmanac = { navController.navigate(Tab.Almanac.route) }
@@ -179,9 +196,15 @@ fun AppNavigation() {
             }
 
             composable(Tab.Almanac.route) {
-                AlmanacScreen(
+                val content = AlmanacProjection.project(
                     collectibles = LevelLibrary.collectibles,
-                    discovered = save.collectibles.toSet(),
+                    speciesDiscovered = save.collectibles.toSet(),
+                    terrariumCatalog = repo.terrariumCatalogSnapshot(),
+                    weatherEcho = save.terrariumEnvironment?.weatherEcho,
+                    terrariumDiscoveries = save.terrariumDiscoveries.toSet()
+                )
+                AlmanacScreen(
+                    content = content,
                     reducedMotion = save.reducedMotion,
                     musicEnabled = save.musicEnabled,
                     soundEnabled = save.soundEnabled,

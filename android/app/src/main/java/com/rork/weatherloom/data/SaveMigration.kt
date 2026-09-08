@@ -10,36 +10,63 @@ import kotlinx.serialization.json.jsonPrimitive
 
 const val CURRENT_SAVE_SCHEMA = 6
 
+internal data class SaveLoadResult(
+    val save: SaveData,
+    val writable: Boolean = save.schema <= CURRENT_SAVE_SCHEMA,
+    val recoveryRequired: Boolean = false,
+    val recoveryRaw: String? = null
+)
+
 /**
  * Explicit, deterministic save decoding. Legacy saves are upgraded without changing
- * valid player progress/settings. Unknown fields remain forward-tolerant. Corrupt
- * payloads fall back to a fresh current-schema save.
+ * valid player progress/settings. Unknown fields remain forward-tolerant. Malformed
+ * payloads are quarantined by [load] so the original raw data cannot be silently lost.
  */
 object SaveMigration {
 
-    fun decode(raw: String?, json: Json): SaveData {
-        if (raw.isNullOrBlank()) return SaveData()
+    fun load(raw: String?, json: Json): SaveLoadResult {
+        if (raw.isNullOrBlank()) return SaveLoadResult(SaveData())
 
-        return runCatching {
-            val element = json.parseToJsonElement(raw)
-            val declaredSchema =
-                element.jsonObject["schema"]?.jsonPrimitive?.intOrNull ?: 1
-            val decoded = json.decodeFromJsonElement(SaveData.serializer(), element)
+        return runCatching { decodeParsed(raw, json) }
+            .fold(
+                onSuccess = { save ->
+                    SaveLoadResult(
+                        save = save,
+                        writable = save.schema <= CURRENT_SAVE_SCHEMA
+                    )
+                },
+                onFailure = {
+                    SaveLoadResult(
+                        save = SaveData(),
+                        writable = false,
+                        recoveryRequired = true,
+                        recoveryRaw = raw
+                    )
+                }
+            )
+    }
 
-            when {
-                declaredSchema <= 2 -> migratePreTerrarium(decoded)
-                declaredSchema == 3 -> migratePlayerProgression(decoded)
-                declaredSchema == 4 -> migrateTerrariumReactionState(decoded)
-                declaredSchema == 5 -> migrateVisitorDiscoveryState(decoded)
-                declaredSchema == CURRENT_SAVE_SCHEMA ->
-                    canonicalizeKnown(decoded.copy(schema = CURRENT_SAVE_SCHEMA))
-                else ->
-                    // Preserve the future schema marker and every field this build
-                    // understands. Do not canonicalize future-schema semantics that
-                    // may intentionally extend ranges understood by this build.
-                    decoded.copy(schema = declaredSchema)
-            }
-        }.getOrElse { SaveData() }
+    fun decode(raw: String?, json: Json): SaveData = load(raw, json).save
+
+    private fun decodeParsed(raw: String, json: Json): SaveData {
+        val element = json.parseToJsonElement(raw)
+        val declaredSchema =
+            element.jsonObject["schema"]?.jsonPrimitive?.intOrNull ?: 1
+        val decoded = json.decodeFromJsonElement(SaveData.serializer(), element)
+
+        return when {
+            declaredSchema <= 2 -> migratePreTerrarium(decoded)
+            declaredSchema == 3 -> migratePlayerProgression(decoded)
+            declaredSchema == 4 -> migrateTerrariumReactionState(decoded)
+            declaredSchema == 5 -> migrateVisitorDiscoveryState(decoded)
+            declaredSchema == CURRENT_SAVE_SCHEMA ->
+                canonicalizeKnown(decoded.copy(schema = CURRENT_SAVE_SCHEMA))
+            else ->
+                // Preserve the future schema marker and every field this build
+                // understands. Do not canonicalize future-schema semantics that
+                // may intentionally extend ranges understood by this build.
+                decoded.copy(schema = declaredSchema)
+        }
     }
 
     private fun migratePreTerrarium(legacy: SaveData): SaveData {
@@ -128,17 +155,17 @@ object SaveMigration {
  * two concurrent callers from reading the same old snapshot and losing one update.
  * The persistence callback is invoked only when the resulting state actually changes.
  *
- * Saves written by a newer schema remain readable but are deliberately read-only in
- * this older binary. Re-serializing them through [SaveData] would silently erase fields
- * this version cannot represent.
+ * Saves written by a newer schema or quarantined after corrupt decoding remain read-only
+ * until an explicit [recover] action replaces them with a current-schema save.
  */
 internal class SaveStateMutator(
     initial: SaveData,
+    writable: Boolean = initial.schema <= CURRENT_SAVE_SCHEMA,
     private val persist: (SaveData) -> Unit
 ) {
     @Volatile
     private var state: SaveData = initial
-    private val writable = initial.schema <= CURRENT_SAVE_SCHEMA
+    private var writable = writable
 
     fun snapshot(): SaveData = state
 
@@ -160,5 +187,15 @@ internal class SaveStateMutator(
             persist(next)
         }
         result
+    }
+
+    fun recover(replacement: SaveData): SaveData = synchronized(this) {
+        require(replacement.schema <= CURRENT_SAVE_SCHEMA) {
+            "Recovery replacement must be understood by this save schema"
+        }
+        state = replacement
+        writable = true
+        persist(replacement)
+        state
     }
 }

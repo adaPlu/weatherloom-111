@@ -61,6 +61,7 @@ class GameRepository private constructor(context: Context) {
     private val prefs: SharedPreferences =
         context.getSharedPreferences("weatherloom", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true; encodeDefaults = true }
+    private val loadedSave = SaveMigration.load(prefs.getString(KEY, null), json)
 
     private val terrariumCatalog = TerrariumCatalog.decode(
         context.assets.open("terrarium_items.json").bufferedReader().use { it.readText() }
@@ -76,14 +77,15 @@ class GameRepository private constructor(context: Context) {
         reactionCatalog
     )
 
-    private val _save = MutableStateFlow(read())
+    private val _save = MutableStateFlow(loadedSave.save)
     val save: StateFlow<SaveData> = _save.asStateFlow()
 
     /** Every mutation goes through this gate before later reward/inventory fields are added. */
-    private val mutator = SaveStateMutator(_save.value, ::persist)
-
-    private fun read(): SaveData =
-        SaveMigration.decode(prefs.getString(KEY, null), json)
+    private val mutator = SaveStateMutator(
+        initial = _save.value,
+        writable = loadedSave.writable,
+        persist = ::persist
+    )
 
     private fun persist(data: SaveData) {
         _save.value = data
@@ -160,7 +162,11 @@ class GameRepository private constructor(context: Context) {
         mutator.mutate { it.copy(highContrast = value) }
 
     fun resetProgress() {
-        mutator.mutate { SaveData() }
+        if (loadedSave.recoveryRequired) {
+            mutator.recover(SaveData())
+        } else {
+            mutator.mutate { SaveData() }
+        }
     }
 
     // ------------------------------------------------------------ derived data

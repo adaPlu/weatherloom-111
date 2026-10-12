@@ -1,10 +1,13 @@
 {
+  "$schema": "https://rork.com/schema/rork.json",
   "apps": [
     {
       "name": "Weatherloom",
       "path": "android",
-      "framework": "kotlin"
+      "framework": "kotlin",
+      "settings": {
+        "androidPackage": "com.ap.weatherloom"
+      }
     }
-  ],
-  "$schema": "https://rork.com/schema/rork.json"
+  ]
 }

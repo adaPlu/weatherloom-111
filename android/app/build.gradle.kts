@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.ap.weatherloom"
+    namespace = "com.rork.weatherloom"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.ap.weatherloom"
+        applicationId = "com.rork.weatherloom"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
